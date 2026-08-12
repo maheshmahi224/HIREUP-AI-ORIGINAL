@@ -11,6 +11,7 @@ import { Builder } from './pages/Builder.js';
 import { AiBuilder } from './pages/AiBuilder.js';
 import { Editor } from './pages/Editor.js';
 import { Resumes } from './pages/Resumes.js';
+import { Support } from './pages/Support.js';
 
 import './styles.css';
 
@@ -35,6 +36,7 @@ function App() {
       <Route path="/editor/:id" element={<Editor />} />
       <Route path="/resumes" element={<Resumes />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/support" element={<Support />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

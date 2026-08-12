@@ -11,6 +11,7 @@ import resumeRoutes from './routes/resume.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import aiToolsRoutes from './routes/ai-tools.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
+import supportRoutes from './routes/support.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import pdfRoutes from './routes/pdf.routes.js';
 import { errorHandler, ok } from './utils/http.js';
@@ -48,6 +49,7 @@ app.use('/api/resumes', resumeRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/ai-tools', aiToolsRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/support', supportRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/admin', adminRoutes);
 

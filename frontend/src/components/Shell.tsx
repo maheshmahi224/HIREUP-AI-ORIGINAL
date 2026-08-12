@@ -68,6 +68,9 @@ export function Shell({ children, fullBleed = false }: { children: React.ReactNo
           <Link className={isCurrent('/profile')} to="/profile">
             Master profile
           </Link>
+          <Link className={isCurrent('/support')} to="/support">
+            Support & Help 💬
+          </Link>
         </nav>
 
         <div style={{ marginTop: 'auto' }}>

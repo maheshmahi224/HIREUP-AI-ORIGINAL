@@ -91,4 +91,31 @@ router.get('/ai-analytics', asyncRoute(async (_req, res) => {
   });
 }));
 
+router.get('/support-tickets', asyncRoute(async (_req, res) => {
+  const db = await database();
+  const tickets = await db
+    .collection('supportTickets')
+    .find({})
+    .sort({ createdAt: -1 })
+    .limit(100)
+    .toArray();
+
+  return ok(res, { tickets });
+}));
+
+router.patch('/support-tickets/:ticketId', asyncRoute(async (req, res) => {
+  const { ticketId } = req.params;
+  const { status, adminNotes } = req.body;
+
+  const db = await database();
+  const updateFields: Record<string, any> = { updatedAt: new Date() };
+  if (status) updateFields.status = status;
+  if (typeof adminNotes === 'string') updateFields.adminNotes = adminNotes;
+
+  await db.collection('supportTickets').updateOne({ ticketId }, { $set: updateFields });
+  const updated = await db.collection('supportTickets').findOne({ ticketId });
+
+  return ok(res, { ticket: updated });
+}));
+
 export default router;
