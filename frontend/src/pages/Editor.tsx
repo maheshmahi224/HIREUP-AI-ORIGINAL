@@ -317,6 +317,22 @@ export function Editor() {
   const hydrated = useRef(false);
   const lastSavedSignature = useRef('');
   const mobileDrawerRef = useRef<HTMLDivElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Photo must be less than 5MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result as string;
+      updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), photoUrl: base64 } }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     if (resumeQuery.data?.resume && !hydrated.current) {
@@ -560,7 +576,22 @@ export function Editor() {
   if (!draft) {
     return (
       <Shell fullBleed>
-        <div className="editor-loading">Loading editor...</div>
+        <div className="editor-coffee-loading-container">
+          <div className="editor-coffee-card">
+            <div className="coffee-gif-wrapper">
+              <img src="/coffee-cup.gif" alt="Brewing resume editor" className="coffee-loading-gif" />
+              <div className="coffee-steam-glow" />
+            </div>
+            <h2 className="coffee-loading-title">Brewing Your Resume Editor</h2>
+            <p className="coffee-loading-subtitle">Piping hot templates, AI formatting & recruiter styling...</p>
+            <div className="coffee-progress-bar">
+              <div className="coffee-progress-fill" />
+            </div>
+            <div className="coffee-tip-badge">
+              <span>☕ Recruiter Tip: Resumes with structured bullet points get 40% more callbacks</span>
+            </div>
+          </div>
+        </div>
       </Shell>
     );
   }
@@ -816,48 +847,78 @@ export function Editor() {
 
   const renderContent = () => (
     <div className="workspace-panel-body">
-      {/* Profile FlowCV Header Card */}
+      {/* Profile & Photo Header Card */}
       <section className="profile-header-card">
+        <input
+          type="file"
+          ref={photoInputRef}
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handlePhotoFileChange}
+        />
         <div className="profile-card-top">
+          <div className="profile-avatar-wrapper">
+            <div className="profile-avatar-preview">
+              {data.personal?.photoUrl ? (
+                <img src={data.personal.photoUrl} alt="Profile headshot" />
+              ) : (
+                <span className="avatar-placeholder-icon">👤</span>
+              )}
+            </div>
+            <div className="profile-photo-controls">
+              <button
+                type="button"
+                className="photo-action-btn primary"
+                onClick={() => photoInputRef.current?.click()}
+                title="Upload photo file from computer"
+              >
+                📷 Upload Photo
+              </button>
+              {data.personal?.photoUrl && (
+                <button
+                  type="button"
+                  className="photo-action-btn danger"
+                  onClick={() => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), photoUrl: '' } }))}
+                  title="Remove photo"
+                >
+                  ✕ Remove
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="profile-info-main">
-            <h3>{data.personal?.name || 'SUNKOJU MAHESHWARA CHARY'}</h3>
-            <p className="profile-job-title">{data.personal?.jobTitle || 'AIML ENTHUSIAST & MERN STACK DEVELOPER'}</p>
+            <div className="profile-name-row">
+              <h3>{data.personal?.name || 'Your Full Name'}</h3>
+              <button
+                type="button"
+                className={`profile-toggle-edit-btn ${editingProfile ? 'active' : ''}`}
+                onClick={() => setEditingProfile(!editingProfile)}
+              >
+                {editingProfile ? '✓ Done Editing' : '✏️ Edit Profile'}
+              </button>
+            </div>
+            <p className="profile-job-title">{data.personal?.jobTitle || 'Your Job Title / Headline'}</p>
             <div className="profile-contact-meta">
               {data.personal?.email && <span>✉ {data.personal.email}</span>}
               {data.personal?.phone && <span>📞 {data.personal.phone}</span>}
               {data.personal?.location && <span>📍 {data.personal.location}</span>}
             </div>
           </div>
-          <div className="profile-avatar-container">
-            <div className="profile-avatar-placeholder">
-              {data.personal?.photoUrl ? (
-                <img src={data.personal.photoUrl} alt="Avatar" />
-              ) : (
-                <span className="avatar-icon">📷</span>
-              )}
-            </div>
-            <button
-              type="button"
-              className="profile-edit-fab"
-              title="Edit Personal Details"
-              onClick={() => setEditingProfile(!editingProfile)}
-            >
-              ✏️
-            </button>
-          </div>
         </div>
 
         {editingProfile && (
-          <div className="profile-edit-drawer">
-            {input('Full Name', data.personal?.name || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), name: value } })))}
-            {input('Professional Title', data.personal?.jobTitle || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), jobTitle: value } })))}
-            {input('Email Address', data.personal?.email || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), email: value } })))}
-            {input('Phone Number', data.personal?.phone || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), phone: value } })))}
-            {input('Location / City', data.personal?.location || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), location: value } })))}
-            {input('Website URL', data.personal?.website || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), website: value } })))}
-            {input('LinkedIn URL', data.personal?.linkedin || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), linkedin: value } })))}
-            {input('GitHub URL', data.personal?.github || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), github: value } })))}
-            {input('Photo Image URL', data.personal?.photoUrl || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), photoUrl: value } })))}
+          <div className="profile-edit-drawer active">
+            <div className="drawer-section-title">Personal Details</div>
+            {input('Full Name', data.personal?.name || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), name: value } })), 'e.g. Maheshwar Chary')}
+            {input('Professional Title', data.personal?.jobTitle || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), jobTitle: value } })), 'e.g. Senior Software Engineer')}
+            {input('Email Address', data.personal?.email || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), email: value } })), 'you@example.com')}
+            {input('Phone Number', data.personal?.phone || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), phone: value } })), '+91 9876543210')}
+            {input('Location / City', data.personal?.location || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), location: value } })), 'Hyderabad, India')}
+            {input('Website URL', data.personal?.website || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), website: value } })), 'https://yourwebsite.com')}
+            {input('LinkedIn URL', data.personal?.linkedin || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), linkedin: value } })), 'linkedin.com/in/username')}
+            {input('GitHub URL', data.personal?.github || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), github: value } })), 'github.com/username')}
+            {input('Direct Photo Image URL (Optional)', data.personal?.photoUrl || '', (value) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), photoUrl: value } })), 'https://... or upload above')}
           </div>
         )}
       </section>
@@ -1403,56 +1464,108 @@ export function Editor() {
   return (
     <Shell fullBleed>
       <div className={`resume-editor premium-editor ${controlPanelCollapsed ? 'panel-collapsed' : ''} ${rightPanel ? 'has-right-panel' : ''} mobile-${mobileMode}`}>
-        {/* Top Toolbar */}
+        {/* Rebuilt Top Toolbar */}
         <header className="document-toolbar">
           <div className="toolbar-left">
             <IconButton label="Open mobile navigation" className="mobile-menu-button" onClick={() => setMobileNavOpen(true)}>
               ☰
             </IconButton>
-            <Link className="editor-toolbar-brand" to="/dashboard" title="Back to dashboard">
-              HireUp.AI
+            <Link className="editor-back-nav" to="/dashboard" title="Back to dashboard">
+              <span className="back-arrow">←</span>
+              <span className="back-text">Dashboard</span>
             </Link>
-            <IconButton label={controlPanelCollapsed ? 'Show editor panel' : 'Hide editor panel'} onClick={() => setControlPanelCollapsed(!controlPanelCollapsed)}>
+            <div className="toolbar-divider" />
+            <IconButton
+              label={controlPanelCollapsed ? 'Show editor panel' : 'Hide editor panel'}
+              className="panel-toggle-btn"
+              onClick={() => setControlPanelCollapsed(!controlPanelCollapsed)}
+            >
               {controlPanelCollapsed ? '▶ Panel' : '◀ Panel'}
             </IconButton>
-            <IconButton label="Undo" disabled={!history.current.length} onClick={undo}>
-              ↩
-            </IconButton>
-            <IconButton label="Redo" disabled={!future.current.length} onClick={redo}>
-              ↪
-            </IconButton>
+            <div className="undo-redo-group">
+              <IconButton label="Undo (Ctrl+Z)" disabled={!history.current.length} onClick={undo}>
+                ↩
+              </IconButton>
+              <IconButton label="Redo (Ctrl+Shift+Z)" disabled={!future.current.length} onClick={redo}>
+                ↪
+              </IconButton>
+            </div>
           </div>
 
-          <div className="toolbar-title">
-            <input className="resume-title-input" aria-label="Resume title" value={draft.title} onChange={(event) => update((resume) => ({ ...resume, title: event.target.value }))} />
-            <span className={`save-status ${saveState}`}>{saveState === 'saving' ? 'Saving...' : saveState === 'error' ? 'Save failed' : 'Saved'}</span>
+          <div className="toolbar-center">
+            <div className="title-edit-container">
+              <input
+                className="resume-title-input"
+                aria-label="Resume title"
+                value={draft.title}
+                onChange={(event) => update((resume) => ({ ...resume, title: event.target.value }))}
+              />
+              <span className="title-pencil">✏️</span>
+            </div>
+            <span className={`save-status-pill ${saveState}`}>
+              {saveState === 'saving' ? '⏳ Saving...' : saveState === 'error' ? '⚠️ Save failed' : '✓ Saved to cloud'}
+            </span>
           </div>
 
           <div className="toolbar-actions">
-            <select aria-label="Resume template" value={draft.templateId} onChange={(event) => update((resume) => ({ ...resume, templateId: event.target.value }))}>
-              {TEMPLATES_META.map((template) => (
-                <option key={template.id} value={template.id}>
-                  {template.name}
-                </option>
-              ))}
-            </select>
-            <IconButton label="Zoom out" onClick={() => { setZoomMode('custom'); setZoom((value) => Math.max(0.28, value - 0.08)); }}>
-              –
-            </IconButton>
-            <button type="button" className="zoom-value" onClick={() => setZoomMode('fit')}>
-              {Math.round(zoom * 100)}%
+            <div className="template-select-pill">
+              <span className="template-icon">📄</span>
+              <select
+                aria-label="Resume template"
+                value={draft.templateId}
+                onChange={(event) => update((resume) => ({ ...resume, templateId: event.target.value }))}
+              >
+                {TEMPLATES_META.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="zoom-controls-group">
+              <button
+                type="button"
+                className="zoom-btn"
+                title="Zoom out"
+                onClick={() => { setZoomMode('custom'); setZoom((value) => Math.max(0.28, value - 0.08)); }}
+              >
+                –
+              </button>
+              <button type="button" className="zoom-value-badge" onClick={() => setZoomMode('fit')}>
+                {Math.round(zoom * 100)}%
+              </button>
+              <button
+                type="button"
+                className="zoom-btn"
+                title="Zoom in"
+                onClick={() => { setZoomMode('custom'); setZoom((value) => Math.min(1.5, value + 0.08)); }}
+              >
+                +
+              </button>
+              <button
+                type="button"
+                className={`zoom-preset-btn ${zoomMode === 'fit' ? 'active' : ''}`}
+                onClick={() => setZoomMode('fit')}
+              >
+                Fit Page
+              </button>
+              <button
+                type="button"
+                className={`zoom-preset-btn ${zoomMode === 'width' ? 'active' : ''}`}
+                onClick={() => setZoomMode('width')}
+              >
+                Fit Width
+              </button>
+            </div>
+
+            <button type="button" className="button ai-panel-trigger-btn" onClick={() => selectWorkspace('ai')}>
+              ⚡ AI Assistant
             </button>
-            <IconButton label="Zoom in" onClick={() => { setZoomMode('custom'); setZoom((value) => Math.min(1.5, value + 0.08)); }}>
-              +
-            </IconButton>
-            <button type="button" className={zoomMode === 'fit' ? 'toolbar-text-button active' : 'toolbar-text-button'} onClick={() => setZoomMode('fit')}>
-              Fit Page
-            </button>
-            <button type="button" className={zoomMode === 'width' ? 'toolbar-text-button active' : 'toolbar-text-button'} onClick={() => setZoomMode('width')}>
-              Fit Width
-            </button>
-            <button type="button" className="button download-pink-btn" onClick={download} disabled={paying}>
-              Download PDF 📥
+
+            <button type="button" className="button download-premium-btn" onClick={download} disabled={paying}>
+              <span>Download PDF 📥</span>
+              <span className="price-tag-badge">₹30</span>
             </button>
           </div>
         </header>

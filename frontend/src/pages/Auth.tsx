@@ -15,6 +15,9 @@ export function Auth({ signup = false }: { signup?: boolean }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  const [showTransition, setShowTransition] = useState(false);
+  const [transitionProgress, setTransitionProgress] = useState(0);
+  const [transitionStatus, setTransitionStatus] = useState('Authenticating session...');
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,11 +51,34 @@ export function Auth({ signup = false }: { signup?: boolean }) {
         if (res?.csrfToken) setCsrf(res.csrfToken);
       }
 
+      // Trigger cool transition popup
+      setShowTransition(true);
+      setTransitionProgress(15);
+      setTransitionStatus('Authentication verified! 🔒');
+
+      setTimeout(() => {
+        setTransitionProgress(55);
+        setTransitionStatus('Preparing your Dashboard workspace... ⚡');
+      }, 400);
+
+      setTimeout(() => {
+        setTransitionProgress(90);
+        setTransitionStatus('Loading career profile & templates... ☕');
+      }, 900);
+
       await queryClient.invalidateQueries({ queryKey: ['session'] });
-      nav('/dashboard');
+
+      setTimeout(() => {
+        setTransitionProgress(100);
+        setTransitionStatus('Welcome! Launching Dashboard... 🚀');
+        setTimeout(() => {
+          nav('/dashboard');
+        }, 300);
+      }, 1400);
+
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Authentication failed');
-    } finally {
+      setShowTransition(false);
       setLoading(false);
     }
   };
@@ -209,6 +235,23 @@ export function Auth({ signup = false }: { signup?: boolean }) {
           </form>
         </div>
       </div>
+
+      {/* Dashboard Launching Popup Modal */}
+      {showTransition && (
+        <div className="dashboard-launch-backdrop">
+          <div className="dashboard-launch-card">
+            <div className="launch-coffee-ring">
+              <img src="/coffee-cup.gif" alt="Brewing Dashboard" className="launch-coffee-gif" />
+            </div>
+            <h3 className="launch-title">Entering Workspace</h3>
+            <p className="launch-status">{transitionStatus}</p>
+            <div className="launch-progress-bar">
+              <div className="launch-progress-fill" style={{ width: `${transitionProgress}%` }} />
+            </div>
+            <div className="launch-badge">☕ HireUp AI Dashboard</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
