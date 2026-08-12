@@ -5,13 +5,36 @@ import { ExecutiveTemplate } from './executive/index.js';
 import { ModernTemplate } from './modern/index.js';
 import { ProfessionalTemplate } from './professional/index.js';
 import { AmagaTemplate } from './amaga/index.js';
-import type { HireUpCustomization, ResumeData, TemplateProps } from './shared/types.js';
+import { KaffleTemplate } from './kaffle/index.js';
+import { SlateRibbonTemplate } from './slate-ribbon/index.js';
+import { QuietBlueTemplate } from './quiet-blue/index.js';
+import { SlateDawnTemplate } from './slate-dawn/index.js';
+import { SageLineTemplate } from './sage-line/index.js';
+import { CorporatePanelTemplate } from './corporate-panel/index.js';
+import { SteadyFormTemplate } from './steady-form/index.js';
+import { LeavesTemplate } from './leaves/index.js';
+import type { HireUpCustomization, ResumeData } from './shared/types.js';
 
 export * from './shared/types.js';
-export { AzurillTemplate, ClassicTemplate, ExecutiveTemplate, ModernTemplate, ProfessionalTemplate, AmagaTemplate };
+export {
+  AzurillTemplate,
+  ClassicTemplate,
+  ExecutiveTemplate,
+  ModernTemplate,
+  ProfessionalTemplate,
+  AmagaTemplate,
+  KaffleTemplate,
+  SlateRibbonTemplate,
+  QuietBlueTemplate,
+  SlateDawnTemplate,
+  SageLineTemplate,
+  CorporatePanelTemplate,
+  SteadyFormTemplate,
+  LeavesTemplate,
+};
 
 export const defaultCustomization: HireUpCustomization = {
-  templateId: 'classic',
+  templateId: 'kaffle',
   showPhoto: false,
   sectionOrder: ['summary', 'education', 'experience', 'projects', 'skills'],
   language: 'en-GB',
@@ -91,6 +114,14 @@ export const defaultCustomization: HireUpCustomization = {
 };
 
 export const TEMPLATES_META = [
+  { id: 'kaffle', name: 'Kaffle', description: 'ATS-friendly centered layout with dark navy accent headers, right-aligned dates, and multi-column skills.', component: KaffleTemplate },
+  { id: 'slate-ribbon', name: 'Slate Ribbon', description: 'Georgia Serif layout with shaded grey section banners and 2-column contact header.', component: SlateRibbonTemplate },
+  { id: 'quiet-blue', name: 'Quiet Blue', description: 'Elegant layout with sky-blue divider lines and clean serif typography.', component: QuietBlueTemplate },
+  { id: 'slate-dawn', name: 'Slate Dawn', description: 'Modern 2-column editorial split layout with dark slate section headers.', component: SlateDawnTemplate },
+  { id: 'sage-line', name: 'Sage Line', description: 'Fresh layout featuring sage-green title fonts and underline section accents.', component: SageLineTemplate },
+  { id: 'corporate-panel', name: 'Corporate Panel', description: 'Double-line corporate headers with shaded title banners and dot proficiency meters.', component: CorporatePanelTemplate },
+  { id: 'steady-form', name: 'Steady Form', description: 'Compact grid layout with round circular avatar photo and pill section headers.', component: SteadyFormTemplate },
+  { id: 'leaves', name: 'Leaves', description: 'Botanical dark-green left margin sidebar with clean modern typography.', component: LeavesTemplate },
   { id: 'classic', name: 'Classic', description: 'Timeless, elegant, and traditional layout suited for all roles.', component: ClassicTemplate },
   { id: 'modern', name: 'Modern', description: 'Clean sans-serif structure with distinct section accents.', component: ModernTemplate },
   { id: 'executive', name: 'Executive', description: 'Sophisticated layout designed for experienced leaders.', component: ExecutiveTemplate },
@@ -101,7 +132,7 @@ export const TEMPLATES_META = [
 
 export function ResumeRenderer({ templateId, data, customization }: { templateId?: string; data: ResumeData; customization?: Partial<HireUpCustomization> }) {
   const custom = { ...defaultCustomization, ...customization, templateId: templateId || defaultCustomization.templateId };
-  const matched = TEMPLATES_META.find(t => t.id === (templateId || 'classic')) || TEMPLATES_META[0];
+  const matched = TEMPLATES_META.find(t => t.id === (templateId || 'kaffle')) || TEMPLATES_META[0];
   const Component = matched.component;
   return React.createElement(Component, { data, customization: custom });
 }
