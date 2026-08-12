@@ -10,6 +10,19 @@ export function Shell({ children, fullBleed = false }: { children: React.ReactNo
   const queryClient = useQueryClient();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Close drawer on Escape key
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Prevent background scroll when drawer open
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
+
   const session = useQuery({
     queryKey: ['session'],
     queryFn: () => api<Session>('/auth/session'),
@@ -72,7 +85,13 @@ export function Shell({ children, fullBleed = false }: { children: React.ReactNo
 
       {/* Slide-Out Drawer Menu for Mobile */}
       {mobileMenuOpen && (
-        <div className="mobile-drawer-backdrop" onClick={() => setMobileMenuOpen(false)}>
+        <div
+          className="mobile-drawer-backdrop"
+          onClick={() => setMobileMenuOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Navigation Menu"
+        >
           <div className="mobile-drawer-card" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-drawer-header">
               <div>

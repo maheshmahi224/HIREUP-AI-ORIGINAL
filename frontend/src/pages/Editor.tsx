@@ -1326,8 +1326,8 @@ export function Editor() {
       <div className="v2-ai-banner">
         <span className="v2-ai-badge-icon">⚡</span>
         <div>
-          <h3>Groq AI Intelligence Engine</h3>
-          <p>Powered by Llama 3.3 70B · ~300 tokens/sec</p>
+          <h3>HireUp AI Intelligence Engine</h3>
+          <p>Powered by advanced LLMs · Fast, accurate, privacy-first</p>
         </div>
       </div>
 

@@ -16,7 +16,7 @@ function generateTicketId() {
 
 /**
  * POST /api/support/chat
- * Groq Llama 3.3 70B Powered Support Assistant
+ * HireUp AI Powered Support Assistant
  * Interacts with orders, resume details, and captures support tickets for Admin Panel.
  */
 router.post(
@@ -76,7 +76,7 @@ ${resumesSummary}
 PLATFORM KNOWLEDGE BASE:
 1. Pricing: Standard high-res A4 PDF export is ₹30 per resume. Payment is processed securely via Razorpay.
 2. PDF Download Flow: Once ₹30 payment is completed and verified, click "Download PDF" in the Editor toolbar for instant 300 DPI A4 PDF export.
-3. AI Extraction: Upload any existing PDF/DOCX or raw text in Dashboard -> AI Import. Powered by Groq Llama 3.3 70B & Gemini 1.5 Flash.
+3. AI Extraction: Upload any existing PDF/DOCX or raw text in Dashboard -> AI Import. Powered by HireUp AI.
 4. Support Policy: If payment succeeded but download is locked, or if a user requests a refund or reports a bug, assure them that an official Support Ticket is being logged directly with our Admin Support Team.
 
 CRITICAL INSTRUCTIONS:

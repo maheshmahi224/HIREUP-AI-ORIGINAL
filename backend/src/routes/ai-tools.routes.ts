@@ -7,10 +7,10 @@ import { env } from '../config/env.js';
 const router = Router();
 router.use(authenticate);
 
-// ─── Groq / OpenAI-compat client ────────────────────────────────────────────
-async function groqChat(messages: Array<{ role: string; content: string }>, temperature = 0.3): Promise<string> {
+// ─── HireUp AI client (OpenAI-compat) ──────────────────────────────────────
+async function aiChat(messages: Array<{ role: string; content: string }>, temperature = 0.3): Promise<string> {
   const key = env.GROQ_API_KEY;
-  if (!key) throw new Error('GROQ_API_KEY not configured');
+  if (!key) throw new Error('AI_API_KEY not configured');
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 28000);
@@ -34,12 +34,12 @@ async function groqChat(messages: Array<{ role: string; content: string }>, temp
 
     if (!res.ok) {
       const txt = await res.text();
-      throw new Error(`Groq API error ${res.status}: ${txt}`);
+      throw new Error(`AI API error ${res.status}: ${txt}`);
     }
 
     const data = await res.json() as { choices?: Array<{ message?: { content?: string } }> };
     const text = data.choices?.[0]?.message?.content;
-    if (!text) throw new Error('Groq returned empty response');
+    if (!text) throw new Error('AI returned empty response');
     return text.trim();
   } catch (err) {
     clearTimeout(timer);
@@ -68,7 +68,7 @@ router.post('/generate-summary', csrf, validate(summarySchema), asyncRoute(async
     skills.length ? `Skills: ${skills.slice(0, 20).join(', ')}` : '',
   ].filter(Boolean).join('\n');
 
-  const result = await groqChat([
+  const result = await aiChat([
     {
       role: 'system',
       content: `You are an expert resume writer. Write a compelling, ATS-optimized professional summary in 2-4 sentences.
@@ -98,7 +98,7 @@ const grammarSchema = z.object({
 router.post('/check-grammar', csrf, validate(grammarSchema), asyncRoute(async (req, res) => {
   const { text, section } = getValidated<typeof grammarSchema._output>(req);
 
-  const result = await groqChat([
+  const result = await aiChat([
     {
       role: 'system',
       content: `You are a professional resume editor and grammar expert.
@@ -159,7 +159,7 @@ router.post('/translate', csrf, validate(translateSchema), asyncRoute(async (req
     educationFields: education.map(e => e.fieldOfStudy || ''),
   };
 
-  const result = await groqChat([
+  const result = await aiChat([
     {
       role: 'system',
       content: `You are a professional resume translator. Translate the provided JSON text fields to ${targetLanguage}.
@@ -228,7 +228,7 @@ router.post('/cover-letter', csrf, validate(coverLetterSchema), asyncRoute(async
     skills.length ? `Top Skills: ${skills.slice(0, 12).join(', ')}` : '',
   ].filter(Boolean).join('\n');
 
-  const result = await groqChat([
+  const result = await aiChat([
     {
       role: 'system',
       content: `You are an expert cover letter writer who crafts compelling, personalized cover letters.

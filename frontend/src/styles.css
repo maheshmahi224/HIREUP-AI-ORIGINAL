@@ -8858,5 +8858,534 @@ label {
   }
 }
 
+/* ==========================================================================
+   HIREUP AI — RESPONSIVE ARCHITECTURE SYSTEM v2
+   Architecture-first responsive design. Not patches.
+   Breakpoints: 480 | 640 | 768 | 900 | 1024 | 1280 | 1440
+   ========================================================================== */
 
+/* ── 1. GLOBAL FLUID TOKENS ─────────────────────────────────────────────── */
+:root {
+  --space-xs: clamp(4px, 1vw, 8px);
+  --space-sm: clamp(8px, 2vw, 12px);
+  --space-md: clamp(12px, 3vw, 20px);
+  --space-lg: clamp(20px, 4vw, 32px);
+  --space-xl: clamp(32px, 6vw, 56px);
+  --container-pad: clamp(16px, 4vw, 32px);
+  --touch-target: 44px;
+}
 
+/* ── 2. SHELL — Safe area + workspace padding ───────────────────────────── */
+@media (max-width: 900px) {
+  /* Workspace must account for the fixed 60px bottom tab bar */
+  .workspace main {
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Desktop sidebar hidden on mobile — shell collapses */
+  .desktop-sidebar {
+    display: none !important;
+  }
+
+  /* Shell becomes single column on mobile */
+  .shell {
+    grid-template-columns: 1fr !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100dvh !important;
+  }
+
+  /* Workspace fills remaining space */
+  .workspace {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  /* Desktop header hidden on mobile (mobile-top-bar replaces it) */
+  .desktop-header {
+    display: none !important;
+  }
+
+  /* Dashboard padding on mobile */
+  .dashboard {
+    padding: 20px 16px 80px !important;
+  }
+
+  /* page-head stacks on mobile */
+  .page-head {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+
+  .page-head h1 {
+    font-size: clamp(24px, 7vw, 32px) !important;
+  }
+
+  /* Page-head actions row */
+  .page-head > div:last-child {
+    display: flex !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .page-head > div:last-child .button,
+  .page-head > div:last-child a.button {
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
+  /* Resume grid single column on small mobile */
+  .resume-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── 3. LANDING NAV — Hide text links on mobile ─────────────────────────── */
+@media (max-width: 768px) {
+  .landing-nav nav {
+    display: none !important;
+  }
+
+  .landing-nav .nav-actions .landing-login {
+    display: none !important;
+  }
+
+  .landing-nav .nav-actions .button {
+    font-size: 13px !important;
+    padding: 0 14px !important;
+    height: 38px !important;
+  }
+
+  /* Landing hero: text above, visual below */
+  .lp-hero {
+    grid-template-columns: 1fr !important;
+    padding-top: 28px !important;
+    padding-bottom: 32px !important;
+    gap: 32px !important;
+  }
+
+  .lp-hero h1 {
+    font-size: clamp(32px, 10vw, 48px) !important;
+    line-height: 1.1 !important;
+  }
+
+  .lp-hero .actions {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .lp-hero .actions .button,
+  .lp-hero .actions a.button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .price-badge {
+    width: 100% !important;
+  }
+
+  /* Hero visual after text on mobile */
+  .lp-hero-visual {
+    order: 2 !important;
+  }
+
+  .lp-hero-copy {
+    order: 1 !important;
+  }
+}
+
+/* ── 4. AUTH — Single column on mobile ──────────────────────────────────── */
+@media (max-width: 768px) {
+  .auth-page-container {
+    padding: 20px 16px !important;
+    min-height: 100dvh !important;
+  }
+
+  /* Single column — left card hidden on mobile */
+  .auth-layout-grid {
+    grid-template-columns: 1fr !important;
+    max-width: 100% !important;
+    gap: 0 !important;
+  }
+
+  .auth-left-card {
+    display: none !important;
+  }
+
+  /* Form takes full width */
+  .auth-form-card {
+    width: 100% !important;
+    border-radius: 16px !important;
+    padding: 24px 20px !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08) !important;
+  }
+
+  /* Inputs comfortable touch targets */
+  .auth-form-card input,
+  .auth-form-card select {
+    height: var(--touch-target) !important;
+    font-size: 16px !important;
+    padding: 10px 14px !important;
+  }
+
+  /* Google button full width */
+  .auth-google-btn,
+  [class*="google-btn"],
+  button[type="button"][style*="display: flex"] {
+    width: 100% !important;
+  }
+}
+
+/* ── 5. EDITOR — Mobile architecture ────────────────────────────────────── */
+@media (max-width: 900px) {
+  /* v2-editor-root fills viewport correctly */
+  .v2-editor-root {
+    height: 100dvh !important;
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Toolbar: compact on mobile */
+  .v2-toolbar {
+    padding: 0 10px !important;
+    gap: 6px !important;
+    height: 52px !important;
+    flex: 0 0 52px !important;
+  }
+
+  /* Hide secondary toolbar items on mobile */
+  .v2-undo-redo,
+  .v2-zoom-group,
+  .v2-ai-trigger-btn,
+  .v2-unpaid-notice-badge,
+  .v2-paid-notice-badge,
+  .v2-save-status-pill {
+    display: none !important;
+  }
+
+  /* Title input shorter on mobile */
+  .v2-title-input {
+    width: clamp(100px, 35vw, 200px) !important;
+    font-size: 13px !important;
+  }
+
+  /* Download button compact on mobile (floating bar handles main CTA) */
+  .v2-toolbar .v2-download-btn {
+    display: none !important;
+  }
+
+  /* Template select compact */
+  .v2-template-select {
+    max-width: 120px !important;
+    font-size: 12px !important;
+  }
+
+  /* Editor body: full width panels */
+  .v2-editor-body {
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  /* Left panel: full width on mobile, controlled by mobileView state */
+  .v2-left-panel {
+    width: 100% !important;
+    flex: 1 !important;
+    overflow: hidden !important;
+  }
+
+  /* Preview panel: full width when shown */
+  .v2-preview-panel {
+    width: 100% !important;
+    flex: 1 !important;
+    overflow: auto !important;
+    padding: 12px 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  /* Floating download bar above safe area */
+  .v2-mobile-floating-bar {
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* Tablet: condensed editor panel */
+@media (min-width: 640px) and (max-width: 900px) {
+  .v2-left-panel {
+    width: 340px !important;
+    flex: 0 0 340px !important;
+  }
+
+  .v2-editor-body {
+    flex-direction: row !important;
+  }
+
+  /* On tablet with mobileView toggle active, still respect it */
+  .v2-editor-root.v2-show-editor .v2-left-panel {
+    display: flex !important;
+  }
+}
+
+/* ── 6. DASHBOARD CARDS — fluid grid ────────────────────────────────────── */
+@media (max-width: 480px) {
+  .dashboard {
+    padding: 16px 14px 80px !important;
+  }
+
+  /* Quick action cards: full width */
+  .dashboard > div[style*="grid"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-head h1 {
+    font-size: 24px !important;
+  }
+
+  /* Buttons stack full width */
+  .page-head > div:last-child {
+    flex-direction: column !important;
+  }
+
+  .page-head > div:last-child .button,
+  .page-head > div:last-child a.button {
+    width: 100% !important;
+    height: 48px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* ── 7. FORMS — Mobile touch targets ────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Prevent iOS zoom on inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    min-height: 44px !important;
+  }
+
+  /* Buttons min touch target */
+  .button,
+  button[type="submit"],
+  button[type="button"].v2-btn-pink {
+    min-height: var(--touch-target) !important;
+  }
+}
+
+/* ── 8. MODALS — Bottom sheet on mobile ─────────────────────────────────── */
+@media (max-width: 600px) {
+  .v2-modal-backdrop {
+    align-items: flex-end !important;
+  }
+
+  .v2-modal-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 20px 20px 0 0 !important;
+    padding: 24px 20px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+    margin: 0 !important;
+  }
+}
+
+/* ── 9. RESUMES & PROFILE PAGES ─────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .resumes-container,
+  .profile-container,
+  [class*="page-container"] {
+    padding: 16px 14px 80px !important;
+  }
+
+  /* Profile grid: single column */
+  [class*="profile-grid"],
+  [class*="two-col"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── 10. FORGOT PASSWORD / OTP ──────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .award-two-col,
+  .award-layout-grid,
+  [class*="forgot-layout"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .award-left-panel,
+  [class*="forgot-left"] {
+    display: none !important;
+  }
+
+  .award-right-panel,
+  [class*="forgot-form"] {
+    width: 100% !important;
+    padding: 24px 20px !important;
+  }
+
+  /* OTP inputs comfortable on mobile */
+  .award-otp-grid input {
+    width: 44px !important;
+    height: 52px !important;
+    font-size: 20px !important;
+  }
+}
+
+/* ── 11. SUPPORT PAGE ───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  [class*="support-container"],
+  [class*="v2-support"] {
+    padding: 16px 14px 80px !important;
+  }
+
+  .v2-support-tabs {
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+  }
+}
+
+/* ── 12. AI BUILDER (AiBuilder page) ────────────────────────────────────── */
+@media (max-width: 768px) {
+  [class*="ai-builder"],
+  [class*="builder-container"] {
+    padding: 16px 14px 80px !important;
+  }
+
+  /* AI input textarea full width */
+  [class*="ai-input"],
+  [class*="raw-input"] {
+    width: 100% !important;
+  }
+
+  /* AI CTA buttons full width */
+  [class*="ai-cta"],
+  [class*="extract-btn"] {
+    width: 100% !important;
+    height: 48px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* ── 13. ULTRA-WIDE — content max-width ─────────────────────────────────── */
+@media (min-width: 1600px) {
+  .dashboard {
+    max-width: 1400px !important;
+  }
+
+  .lp-hero {
+    max-width: 1600px !important;
+  }
+}
+
+/* ── 14. LANDING NAV — hamburger on mobile ──────────────────────────────── */
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 16px !important;
+    height: 60px !important;
+  }
+
+  .nav-actions {
+    gap: 8px !important;
+  }
+}
+
+/* ── 15. VIDEO SHOWCASE — responsive ────────────────────────────────────── */
+@media (max-width: 768px) {
+  .video-player-card {
+    border-radius: 12px !important;
+  }
+
+  .video-caption-bar {
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 14px !important;
+  }
+
+  .video-caption-bar .button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── 16. TEMPLATE GALLERY — horizontal scroll on mobile ─────────────────── */
+@media (max-width: 640px) {
+  .template-gallery {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 14px !important;
+    padding-bottom: 8px !important;
+    scrollbar-width: none !important;
+  }
+
+  .template-gallery::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .template-gallery article {
+    flex: 0 0 82vw !important;
+    scroll-snap-align: start !important;
+  }
+}
+
+/* ── 17. EDITOR CUSTOMIZE — bottom sheet feel on mobile ─────────────────── */
+@media (max-width: 900px) {
+  /* Customize panel content scrollable */
+  .v2-workspace-scroll {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* cz-cards slightly more compact */
+  .cz-card {
+    padding: 14px !important;
+    margin-bottom: 12px !important;
+  }
+}
+
+/* ── 18. MOBILE DRAWER — accessibility improvements ─────────────────────── */
+@media (max-width: 900px) {
+  .mobile-drawer-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0, 0, 0, 0.45) !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: stretch !important;
+    justify-content: flex-end !important;
+  }
+
+  .mobile-drawer-card {
+    width: min(320px, 85vw) !important;
+    max-height: 100dvh !important;
+    overflow-y: auto !important;
+    padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+  }
+
+  /* Bottom tab bar safe area */
+  .mobile-bottom-tab-bar {
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    height: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ── 19. IMAGES — always responsive ─────────────────────────────────────── */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── 20. PREVENT HORIZONTAL OVERFLOW ────────────────────────────────────── */
+body {
+  overflow-x: hidden;
+}
+
+/* Remove overflow-x: hidden from shell that hides layout problems */
+.shell {
+  overflow-x: unset;
+}

@@ -113,7 +113,7 @@ export function Auth({ signup = false }: { signup?: boolean }) {
 
           <div className="auth-left-content">
             <h2>Craft resumes that get you hired.</h2>
-            <p>Built with AI resume parsing, Groq speed, and instant A4 PDF exports.</p>
+            <p>Built with AI resume parsing, lightning-fast AI, and instant A4 PDF exports.</p>
           </div>
         </div>
 

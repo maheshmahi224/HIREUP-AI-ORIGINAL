@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -54,8 +54,48 @@ function Layout({ children }: { children: React.ReactNode }) {
 
   const isCurrent = (path: string) => (location.pathname === path ? 'active' : '');
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="layout">
+      {/* Mobile Top Bar */}
+      <div className="admin-mobile-bar">
+        <Link className="brand" to="/">
+          hireup<span>ai</span>
+          <small>ADMIN</small>
+        </Link>
+        <button className="admin-hamburger" onClick={() => setMobileOpen(true)} aria-label="Open menu">
+          ☰
+        </button>
+      </div>
+
+      {/* Mobile Drawer */}
+      <div
+        className={`admin-drawer-backdrop ${mobileOpen ? 'open' : ''}`}
+        onClick={() => setMobileOpen(false)}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className="admin-drawer" onClick={(e) => e.stopPropagation()}>
+          <Link className="brand" to="/" onClick={() => setMobileOpen(false)}>
+            hireup<span>ai</span>
+            <small>ADMIN</small>
+          </Link>
+          <nav>
+            <Link className={isCurrent('/')} to="/" onClick={() => setMobileOpen(false)}>📊 Overview</Link>
+            <Link className={isCurrent('/users')} to="/users" onClick={() => setMobileOpen(false)}>👥 Users</Link>
+            <Link className={isCurrent('/resumes')} to="/resumes" onClick={() => setMobileOpen(false)}>📄 Resumes</Link>
+            <Link className={isCurrent('/payments')} to="/payments" onClick={() => setMobileOpen(false)}>💳 Payments</Link>
+            <Link className={isCurrent('/ai-analytics')} to="/ai-analytics" onClick={() => setMobileOpen(false)}>🤖 AI Telemetry</Link>
+          </nav>
+        </div>
+      </div>
       <aside>
         <Link className="brand" to="/">
           hireup<span>ai</span>
