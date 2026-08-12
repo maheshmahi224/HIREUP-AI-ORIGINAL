@@ -5963,19 +5963,30 @@ label {
   }
 
   /* Make the resume paper fill and print cleanly */
-  .resume-paper,
-  .resume-canvas,
-  [class*="resume-template"],
-  [class*="template-container"] {
+  .resume-paper {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
     width: 210mm !important;
     min-height: 297mm !important;
-    max-width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    transform-origin: unset !important;
     box-shadow: none !important;
     border: none !important;
     border-radius: 0 !important;
     padding: 0 !important;
     margin: 0 auto !important;
     page-break-inside: avoid;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .resume-canvas,
+  [class*="resume-template"],
+  [class*="template-container"] {
+    width: 100% !important;
     background: #ffffff !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;

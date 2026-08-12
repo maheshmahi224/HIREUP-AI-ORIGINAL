@@ -473,10 +473,27 @@ export function Editor() {
     updateList(key, [...items.slice(0, index + 1), { ...clone(item), id: ids() }, ...items.slice(index + 1)]);
   };
 
+  const printResume = () => {
+    // Temporarily strip zoom inline styles so the CSS @media print rules take effect cleanly
+    const slot = document.querySelector<HTMLElement>('.resume-paper-slot');
+    const paper = document.querySelector<HTMLElement>('.resume-paper');
+    const slotW = slot?.style.width ?? '';
+    const slotH = slot?.style.height ?? '';
+    const paperTransform = paper?.style.transform ?? '';
+    if (slot) { slot.style.width = ''; slot.style.height = ''; }
+    if (paper) { paper.style.transform = 'none'; }
+    window.print();
+    // Restore after print dialog closes
+    setTimeout(() => {
+      if (slot) { slot.style.width = slotW; slot.style.height = slotH; }
+      if (paper) { paper.style.transform = paperTransform; }
+    }, 500);
+  };
+
   const download = async () => {
     if (!draft) return;
     if (draft.paymentState === 'paid') {
-      window.print();
+      printResume();
       return;
     }
     setPaying(true);
@@ -486,7 +503,7 @@ export function Editor() {
       if (order.alreadyPaid) {
         commit({ ...draft, paymentState: 'paid' });
         setPaying(false);
-        window.print();
+        printResume();
         return;
       }
 
@@ -503,7 +520,7 @@ export function Editor() {
           title: 'Payment Complete! 🎉',
           message: 'Download unlocked! Opening PDF save window...',
         });
-        window.print();
+        printResume();
         return;
       }
 
@@ -541,7 +558,7 @@ export function Editor() {
               title: 'Payment Successful! 🎉',
               message: 'Your resume download has been unlocked.',
             });
-            window.print();
+            printResume();
           } catch {
             setPaying(false);
             setPaymentNotice({
