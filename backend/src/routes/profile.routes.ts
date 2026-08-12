@@ -1,0 +1,5 @@
+import { Router } from 'express'; import { database } from '../db/mongo.js'; import { authenticate, csrf } from '../middleware/auth.js'; import type { Profile } from '../types/domain.js'; import { profileSchema } from '../validators/schemas.js'; import { asyncRoute, getValidated, ok, validate } from '../utils/http.js';
+const router=Router(); router.use(authenticate);
+router.get('/',asyncRoute(async(req,res)=>{const profile=await (await database()).collection<Profile>('profiles').findOne({userId:req.auth!.user._id});return ok(res,{profile});}));
+router.put('/',csrf,validate(profileSchema),asyncRoute(async(req,res)=>{const input=getValidated<typeof profileSchema._output>(req);const now=new Date();const db=await database();await db.collection<Profile>('profiles').updateOne({userId:req.auth!.user._id},{$set:{...input,updatedAt:now},$setOnInsert:{userId:req.auth!.user._id,createdAt:now}},{upsert:true});const profile=await db.collection<Profile>('profiles').findOne({userId:req.auth!.user._id});return ok(res,{profile});}));
+export default router;

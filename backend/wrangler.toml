@@ -1,0 +1,7 @@
+name = "hireup-api"
+main = "src/worker.ts"
+compatibility_date = "2025-01-01"
+
+# The HTTP handlers are intentionally framework-neutral. MongoDB's native driver
+# requires a TCP-capable runtime; deploy this Node adapter where Workers cannot
+# reach Atlas, or replace db/mongo.ts with Atlas Data API/Durable Object adapter.

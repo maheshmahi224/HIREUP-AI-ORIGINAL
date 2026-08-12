@@ -1,0 +1,10 @@
+import { z } from 'zod';
+export const email = z.string().trim().email().max(254).transform(v => v.toLowerCase());
+export const password = z.string().min(12, 'Password must be at least 12 characters').max(128);
+export const registerSchema = z.object({ name: z.string().trim().min(2).max(80), email, password });
+export const loginSchema = z.object({ email, password: z.string().min(1).max(128) });
+export const otpRequestSchema = z.object({ email });
+export const otpVerifySchema = z.object({ email, code: z.string().regex(/^\d{6}$/) });
+export const profileSchema = z.object({ personal: z.record(z.string(), z.unknown()).default({}), sections: z.record(z.string(), z.array(z.record(z.string(), z.unknown()))).default({}) });
+export const resumeSchema = z.object({ title: z.string().trim().min(1).max(100), templateId: z.string().trim().min(1).max(80).default('classic'), content: z.record(z.string(), z.unknown()).default({}) });
+export const resumePatchSchema = resumeSchema.partial();

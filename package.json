@@ -1,0 +1,13 @@
+{
+  "name": "hireupai-resume-saas",
+  "private": true,
+  "workspaces": ["frontend", "backend", "admin"],
+  "scripts": {
+    "dev:frontend": "npm --workspace frontend run dev",
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:admin": "npm --workspace admin run dev",
+    "typecheck": "npm run typecheck --workspaces",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces"
+  }
+}
