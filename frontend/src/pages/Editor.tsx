@@ -61,6 +61,41 @@ function usePersistentState<T>(key: string, initial: T) {
   return [value, setValue] as const;
 }
 
+function TrackStepper({ label, value, min, max, step, unit, onChange }: { label: string; value: number; min: number; max: number; step: number; unit?: string; onChange: (v: number) => void }) {
+  const percent = Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+  const ticks = [0, 20, 40, 60, 80, 100];
+
+  return (
+    <div>
+      <div className="cz-label">
+        <span>{label}</span>
+        <span className="cz-val-badge">{value > 0 && label !== 'Base Font Size' && label !== 'Line Height' ? `+${value}${unit || ''}` : `${value}${unit || ''}`}</span>
+      </div>
+      <div className="cz-slider-stepper-row">
+        <div
+          className="cz-track-wrapper"
+          onClick={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const clickPercent = (e.clientX - rect.left) / rect.width;
+            const rawVal = min + clickPercent * (max - min);
+            const stepped = Math.round(rawVal / step) * step;
+            onChange(Number(Math.min(max, Math.max(min, stepped)).toFixed(1)));
+          }}
+        >
+          <div className="cz-track-ticks">
+            {ticks.map((t) => (
+              <span key={t} className="cz-tick" />
+            ))}
+          </div>
+          <div className="cz-track-thumb" style={{ left: `calc(${percent}% - 12px)` }} />
+        </div>
+        <button type="button" className="cz-stepper-btn" onClick={() => onChange(Number(Math.max(min, value - step).toFixed(1)))}>-</button>
+        <button type="button" className="cz-stepper-btn" onClick={() => onChange(Number(Math.min(max, value + step).toFixed(1)))}>+</button>
+      </div>
+    </div>
+  );
+}
+
 function TagInput({ label, tags, onChange }: { label: string; tags: string[]; onChange: (tags: string[]) => void }) {
   const [inputValue, setInputValue] = useState('');
 
@@ -852,82 +887,421 @@ export function Editor() {
     </div>
   );
 
-  const renderCustomize = () => (
-    <div className="v2-workspace-scroll">
-      {/* 1. Templates */}
-      <div className="v2-section-card">
-        <div className="v2-section-header" onClick={() => toggleSetting('Design Templates')}>
-          <span className="v2-sec-icon">🎨</span>
-          <span className="v2-sec-title">Design Templates</span>
-          <span className="v2-sec-arrow">{openSettingGroups.includes('Design Templates') ? '▲' : '▼'}</span>
+  const renderCustomize = () => {
+    const curColor = customization.primaryColor || '#1E293B';
+    const colorSwatches = [
+      '#1E293B', '#475569', '#0D9488', '#0284C7', '#0EA5E9',
+      '#2563EB', '#4F46E5', '#7C3AED', '#9333EA', '#831843',
+      '#E11D48', '#F43F5E', '#FF5722', '#2E7D32', '#6F4E37'
+    ];
+
+    return (
+      <div className="v2-workspace-scroll" style={{ padding: '4px' }}>
+        {/* 1. Design Templates */}
+        <div className="cz-card">
+          <div className="cz-card-header">
+            <h3 className="cz-card-title">🎨 Design Templates</h3>
+            <button type="button" className="v2-btn-outline" style={{ padding: '4px 10px', fontSize: '11px' }} onClick={() => toggleSetting('Design Templates')}>
+              {openSettingGroups.includes('Design Templates') ? 'Hide ▲' : 'Show ▼'}
+            </button>
+          </div>
+          <p className="cz-card-subtitle">Update your entire resume design with one click ℹ️</p>
+
+          <div className="v2-template-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+            {TEMPLATES_META.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`cz-option-card ${draft.templateId === t.id ? 'active' : ''}`}
+                style={{ padding: '10px 6px', textAlign: 'left', alignItems: 'flex-start' }}
+                onClick={() => update((r) => ({ ...r, templateId: t.id }))}
+              >
+                <span className="label" style={{ fontSize: '12px', fontWeight: 800 }}>{t.name}</span>
+                <span style={{ fontSize: '10px', color: '#9CA3AF', marginTop: '2px' }}>{t.id}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        {openSettingGroups.includes('Design Templates') && (
-          <div className="v2-section-body">
-            <div className="v2-template-grid">
-              {TEMPLATES_META.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={`v2-tpl-card ${draft.templateId === t.id ? 'active' : ''}`}
-                  onClick={() => update((r) => ({ ...r, templateId: t.id }))}
-                >
-                  <strong>{t.name}</strong>
-                  <small>{t.id}</small>
-                </button>
-              ))}
+
+        {/* 2. Layout */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Layout</h3>
+
+          <div className="cz-label">Columns</div>
+          <div className="cz-option-grid cz-option-grid-3">
+            {[
+              { id: '1', label: 'One', icon: '☰' },
+              { id: '2', label: 'Two', icon: '☷' },
+              { id: 'mix', label: 'Mix', icon: '☶' },
+            ].map((col) => (
+              <div
+                key={col.id}
+                className={`cz-option-card ${customization.columns === col.id || (!customization.columns && col.id === '1') ? 'active' : ''}`}
+                onClick={() => updateSettings({ columns: col.id as any })}
+              >
+                <span className="icon">{col.icon}</span>
+                <span className="label">{col.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="cz-label" style={{ marginTop: '16px' }}>Change Section Layout</div>
+          <div className="cz-reorder-list">
+            {[
+              { key: 'personal', label: 'Personal Details', icon: '👤' },
+              { key: 'summary', label: 'Profile', icon: '📝' },
+              { key: 'experience', label: 'Professional Experience', icon: '💼' },
+              { key: 'education', label: 'Education', icon: '🎓' },
+              { key: 'skills', label: 'Skills', icon: '💡' },
+              { key: 'languages', label: 'Languages', icon: '🌐' },
+              { key: 'projects', label: 'Projects', icon: '📂' },
+              { key: 'page-break', label: 'Page break', icon: '📄' },
+            ].map((sec) => (
+              <div key={sec.key} className="cz-reorder-item">
+                <div>
+                  <span className="cz-reorder-handle">⋮⋮</span>
+                  <span>{sec.icon}</span>
+                  <span style={{ marginLeft: '8px' }}>{sec.label}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Font Size */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Font Size</h3>
+
+          <TrackStepper
+            label="Base Font Size"
+            value={customization.fontSize || 9}
+            min={7}
+            max={14}
+            step={0.5}
+            unit="pt"
+            onChange={(val) => updateSettings({ fontSize: val })}
+          />
+          <TrackStepper
+            label="Full Name"
+            value={customization.nameFontSizeOffset ?? 14}
+            min={8}
+            max={24}
+            step={0.5}
+            unit="pt"
+            onChange={(val) => updateSettings({ nameFontSizeOffset: val })}
+          />
+          <TrackStepper
+            label="Professional Title"
+            value={customization.titleFontSizeOffset ?? 6.5}
+            min={0}
+            max={12}
+            step={0.5}
+            unit="pt"
+            onChange={(val) => updateSettings({ titleFontSizeOffset: val })}
+          />
+          <TrackStepper
+            label="Section Headings"
+            value={customization.headingFontSizeOffset ?? 1}
+            min={0}
+            max={8}
+            step={0.5}
+            unit="pt"
+            onChange={(val) => updateSettings({ headingFontSizeOffset: val })}
+          />
+          <TrackStepper
+            label="Entry Header"
+            value={customization.entryHeaderOffset ?? 0}
+            min={0}
+            max={6}
+            step={0.5}
+            unit="pt"
+            onChange={(val) => updateSettings({ entryHeaderOffset: val })}
+          />
+        </div>
+
+        {/* 4. Spacing */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Spacing</h3>
+
+          <TrackStepper
+            label="Line Height"
+            value={customization.lineHeight || 1.1}
+            min={0.9}
+            max={1.8}
+            step={0.05}
+            onChange={(val) => updateSettings({ lineHeight: val })}
+          />
+          <TrackStepper
+            label="Space Between Elements"
+            value={customization.sectionSpacing || 12}
+            min={4}
+            max={24}
+            step={1}
+            unit="px"
+            onChange={(val) => updateSettings({ sectionSpacing: val })}
+          />
+          <TrackStepper
+            label="Left & Right Margin"
+            value={customization.marginHorizontal || 10}
+            min={4}
+            max={24}
+            step={1}
+            unit="mm"
+            onChange={(val) => updateSettings({ marginHorizontal: val })}
+          />
+          <TrackStepper
+            label="Top & Bottom Margin"
+            value={customization.marginVertical || 10}
+            min={4}
+            max={24}
+            step={1}
+            unit="mm"
+            onChange={(val) => updateSettings({ marginVertical: val })}
+          />
+        </div>
+
+        {/* 5. Entry Layout */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Entry Layout</h3>
+
+          <div className="cz-label">Structure</div>
+          <div className="cz-option-grid cz-option-grid-2">
+            <div
+              className={`cz-option-card ${customization.entryStructure !== 'columns' ? 'active' : ''}`}
+              onClick={() => updateSettings({ entryStructure: 'full' })}
+            >
+              <span className="icon">☰</span>
+              <span className="label">Full Width</span>
+            </div>
+            <div
+              className={`cz-option-card ${customization.entryStructure === 'columns' ? 'active' : ''}`}
+              onClick={() => updateSettings({ entryStructure: 'columns' })}
+            >
+              <span className="icon">☷</span>
+              <span className="label">Columns</span>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* 2. Document Settings */}
-      <div className="v2-section-card">
-        <div className="v2-section-header" onClick={() => toggleSetting('Document Settings')}>
-          <span className="v2-sec-icon">⚙️</span>
-          <span className="v2-sec-title">Document Settings</span>
-          <span className="v2-sec-arrow">{openSettingGroups.includes('Document Settings') ? '▲' : '▼'}</span>
+          <div className="cz-label">Date & Location Position</div>
+          <div className="cz-segmented-bar">
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.datePosition !== 'below' ? 'active' : ''}`}
+              onClick={() => updateSettings({ datePosition: 'right' })}
+            >
+              Right
+            </button>
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.datePosition === 'below' ? 'active' : ''}`}
+              onClick={() => updateSettings({ datePosition: 'below' })}
+            >
+              Below Title
+            </button>
+          </div>
+
+          <div className="cz-label">Entry Header Split</div>
+          <div className="cz-segmented-bar">
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.entryHeaderSplit !== 'manual' ? 'active' : ''}`}
+              onClick={() => updateSettings({ entryHeaderSplit: 'auto' })}
+            >
+              Auto
+            </button>
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.entryHeaderSplit === 'manual' ? 'active' : ''}`}
+              onClick={() => updateSettings({ entryHeaderSplit: 'manual' })}
+            >
+              Manual
+            </button>
+          </div>
         </div>
-        {openSettingGroups.includes('Document Settings') && (
-          <div className="v2-section-body">
-            <label className="v2-input-field">
-              <span>Language</span>
-              <select value={customization.language || 'en-GB'} onChange={(e) => updateSettings({ language: e.target.value })}>
-                <option value="en-GB">English (UK)</option>
-                <option value="en">English (US)</option>
-                <option value="es">Spanish</option>
-                <option value="fr">French</option>
-                <option value="de">German</option>
-                <option value="hi">Hindi</option>
-              </select>
+
+        {/* 6. Section Headings */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Section Headings</h3>
+
+          <div className="cz-label">Style</div>
+          <div className="cz-style-grid">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => (
+              <div
+                key={s}
+                className={`cz-style-tile ${(customization.headingStyle || 1) === s ? 'active' : ''}`}
+                onClick={() => updateSettings({ headingStyle: s as any })}
+              >
+                <div style={{
+                  width: '80%',
+                  height: s === 1 ? '2px' : s === 2 ? '100%' : '3px',
+                  background: s === 2 ? '#EEF2FF' : '#6366F1',
+                  borderBottom: s === 1 ? '2px solid #6366F1' : 'none',
+                  borderRadius: s === 2 ? '4px' : '1px'
+                }} />
+              </div>
+            ))}
+          </div>
+
+          <div className="cz-label">Capitalization</div>
+          <div className="cz-segmented-bar">
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.headingCase !== 'uppercase' ? 'active' : ''}`}
+              onClick={() => updateSettings({ headingCase: 'capitalize' })}
+            >
+              Capitalize
+            </button>
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.headingCase === 'uppercase' ? 'active' : ''}`}
+              onClick={() => updateSettings({ headingCase: 'uppercase' })}
+            >
+              Uppercase
+            </button>
+          </div>
+
+          <div className="cz-label">Icons</div>
+          <div className="cz-segmented-bar">
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.headingIcons === 'none' || !customization.headingIcons ? 'active' : ''}`}
+              onClick={() => updateSettings({ headingIcons: 'none' })}
+            >
+              None
+            </button>
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.headingIcons === 'outline' ? 'active' : ''}`}
+              onClick={() => updateSettings({ headingIcons: 'outline' })}
+            >
+              Outline
+            </button>
+            <button
+              type="button"
+              className={`cz-seg-btn ${customization.headingIcons === 'filled' ? 'active' : ''}`}
+              onClick={() => updateSettings({ headingIcons: 'filled' })}
+            >
+              Filled
+            </button>
+          </div>
+        </div>
+
+        {/* 7. Font Selection */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Font</h3>
+
+          <label className="v2-input-field" style={{ marginBottom: '12px' }}>
+            <span>Body Font</span>
+            <select value={customization.fontFamily || 'Inter'} onChange={(e) => updateSettings({ fontFamily: e.target.value })}>
+              <option value="Inter">Inter (Modern Clean)</option>
+              <option value="Source Sans Pro">Source Sans Pro</option>
+              <option value="Roboto">Roboto</option>
+              <option value="Outfit">Outfit</option>
+              <option value="Georgia">Georgia (Classic Serif)</option>
+              <option value="Merriweather">Merriweather</option>
+              <option value="Playfair Display">Playfair Display</option>
+            </select>
+          </label>
+
+          <label className="v2-input-field">
+            <span>Name Font</span>
+            <select value={customization.headerFontFamily || 'same'} onChange={(e) => updateSettings({ headerFontFamily: e.target.value })}>
+              <option value="same">Same as body font</option>
+              <option value="Playfair Display">Playfair Display</option>
+              <option value="Outfit">Outfit</option>
+              <option value="Space Grotesk">Space Grotesk</option>
+              <option value="Georgia">Georgia</option>
+            </select>
+          </label>
+        </div>
+
+        {/* 8. Colors */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Colors</h3>
+
+          <div className="cz-label">Palette Swatches</div>
+          <div className="cz-color-grid">
+            {colorSwatches.map((hex) => (
+              <div
+                key={hex}
+                className={`cz-color-swatch ${curColor === hex ? 'active' : ''}`}
+                style={{ backgroundColor: hex }}
+                onClick={() => updateSettings({ primaryColor: hex })}
+              >
+                {curColor === hex && <span className="check">✓</span>}
+              </div>
+            ))}
+          </div>
+
+          <div className="cz-label">Apply Accent Color</div>
+          <div className="cz-checklist-grid">
+            <label className="cz-checkbox-label">
+              <input type="checkbox" defaultChecked />
+              <span>Name</span>
             </label>
-            <label className="v2-input-field">
-              <span>Page Format</span>
-              <select value={customization.pageFormat || 'A4'} onChange={(e) => updateSettings({ pageFormat: e.target.value as any })}>
-                <option value="A4">A4 Standard</option>
-                <option value="Letter">US Letter</option>
-              </select>
+            <label className="cz-checkbox-label">
+              <input type="checkbox" defaultChecked />
+              <span>Job title</span>
+            </label>
+            <label className="cz-checkbox-label">
+              <input type="checkbox" defaultChecked />
+              <span>Headings</span>
+            </label>
+            <label className="cz-checkbox-label">
+              <input type="checkbox" defaultChecked />
+              <span>Headings line</span>
+            </label>
+            <label className="cz-checkbox-label">
+              <input type="checkbox" defaultChecked />
+              <span>Dots/bars/bubbles</span>
+            </label>
+            <label className="cz-checkbox-label">
+              <input type="checkbox" />
+              <span>Dates</span>
+            </label>
+            <label className="cz-checkbox-label">
+              <input type="checkbox" />
+              <span>Link icons</span>
+            </label>
+            <label className="cz-checkbox-label">
+              <input type="checkbox" />
+              <span>Header icons</span>
             </label>
           </div>
-        )}
-      </div>
-
-      {/* 3. Typography */}
-      <div className="v2-section-card">
-        <div className="v2-section-header" onClick={() => toggleSetting('Font Size')}>
-          <span className="v2-sec-icon">🔤</span>
-          <span className="v2-sec-title">Typography & Font Sizes</span>
-          <span className="v2-sec-arrow">{openSettingGroups.includes('Font Size') ? '▲' : '▼'}</span>
         </div>
-        {openSettingGroups.includes('Font Size') && (
-          <div className="v2-section-body">
-            <StepperControl label="Base Font Size" value={customization.fontSize || 9} min={7} max={14} step={0.5} unit="pt" onChange={(val) => updateSettings({ fontSize: val })} />
-            <StepperControl label="Full Name Size" value={customization.nameFontSizeOffset ?? 14} min={8} max={24} step={0.5} unit="pt" onChange={(val) => updateSettings({ nameFontSizeOffset: val })} />
-            <StepperControl label="Section Headings" value={customization.headingFontSizeOffset ?? 1} min={0} max={8} step={0.5} unit="pt" onChange={(val) => updateSettings({ headingFontSizeOffset: val })} />
+
+        {/* 9. Header */}
+        <div className="cz-card">
+          <h3 className="cz-card-title" style={{ marginBottom: '14px' }}>Header</h3>
+
+          <div className="cz-label">Text Alignment</div>
+          <div className="cz-option-grid cz-option-grid-2">
+            <div
+              className={`cz-option-card ${customization.headerAlign !== 'center' ? 'active' : ''}`}
+              onClick={() => updateSettings({ headerAlign: 'left' })}
+            >
+              <span className="icon">📄</span>
+              <span className="label">Left</span>
+            </div>
+            <div
+              className={`cz-option-card ${customization.headerAlign === 'center' ? 'active' : ''}`}
+              onClick={() => updateSettings({ headerAlign: 'center' })}
+            >
+              <span className="icon">📄</span>
+              <span className="label">Center</span>
+            </div>
           </div>
-        )}
+
+          <div className="cz-label">Details Arrangement</div>
+          <div className="cz-segmented-bar">
+            <button type="button" className="cz-seg-btn active">Bar (|)</button>
+            <button type="button" className="cz-seg-btn">Bullet (•)</button>
+            <button type="button" className="cz-seg-btn">Icon</button>
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const runAiAction = async (endpoint: string, body: Record<string, unknown>) => {
     setAiRunning(true);

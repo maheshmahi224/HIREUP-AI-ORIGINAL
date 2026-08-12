@@ -8304,5 +8304,344 @@ label {
   margin: 0 !important;
 }
 
+/* ==========================================================================
+   CUSTOMIZE PANEL DESIGN SYSTEM (EXACT MATCHING REFERENCE SCREENSHOTS)
+   ========================================================================== */
+
+.cz-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 14px !important;
+  padding: 20px !important;
+  margin-bottom: 16px !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.cz-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06) !important;
+}
+
+.cz-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 16px !important;
+}
+
+.cz-card-title {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #1E1B4B !important;
+  letter-spacing: -0.01em !important;
+  margin: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.cz-card-subtitle {
+  font-size: 12px !important;
+  color: #6B7280 !important;
+  margin: 2px 0 16px !important;
+  line-height: 1.4 !important;
+}
+
+.cz-label {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #374151 !important;
+  margin-bottom: 8px !important;
+  margin-top: 14px !important;
+}
+
+.cz-label:first-child {
+  margin-top: 0 !important;
+}
+
+.cz-val-badge {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #6B7280 !important;
+}
+
+.cz-slider-stepper-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+}
+
+.cz-track-wrapper {
+  position: relative !important;
+  flex: 1 !important;
+  height: 28px !important;
+  background: #F3F4F6 !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 8px !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+}
+
+.cz-track-ticks {
+  position: absolute !important;
+  inset: 0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  padding: 0 12px !important;
+  pointer-events: none !important;
+}
+
+.cz-tick {
+  width: 1.5px !important;
+  height: 10px !important;
+  background: #D1D5DB !important;
+  border-radius: 1px !important;
+}
+
+.cz-track-thumb {
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  background: #6366F1 !important;
+  border-radius: 6px !important;
+  top: 2px !important;
+  transition: left 0.15s ease, transform 0.1s ease !important;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4) !important;
+}
+
+.cz-stepper-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  background: #FFFFFF !important;
+  color: #374151 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.cz-stepper-btn:hover {
+  border-color: #6366F1 !important;
+  color: #6366F1 !important;
+  background: #EEF2FF !important;
+}
+
+.cz-option-grid {
+  display: grid !important;
+  gap: 10px !important;
+  margin-bottom: 14px !important;
+}
+
+.cz-option-grid-2 { grid-template-columns: repeat(2, 1fr) !important; }
+.cz-option-grid-3 { grid-template-columns: repeat(3, 1fr) !important; }
+.cz-option-grid-4 { grid-template-columns: repeat(4, 1fr) !important; }
+
+.cz-option-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 12px 8px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid #E5E7EB !important;
+  background: #FFFFFF !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-align: center !important;
+}
+
+.cz-option-card:hover {
+  border-color: #A5B4FC !important;
+  background: #F8FAFC !important;
+}
+
+.cz-option-card.active {
+  border-color: #6366F1 !important;
+  background: #EEF2FF !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+.cz-option-card span.icon {
+  margin-bottom: 6px !important;
+  font-size: 18px !important;
+  color: #6366F1 !important;
+}
+
+.cz-option-card span.label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: #4B5563 !important;
+}
+
+.cz-option-card.active span.label {
+  color: #4338CA !important;
+}
+
+.cz-segmented-bar {
+  display: flex !important;
+  background: #F3F4F6 !important;
+  padding: 3px !important;
+  border-radius: 10px !important;
+  margin-bottom: 14px !important;
+  gap: 3px !important;
+}
+
+.cz-seg-btn {
+  flex: 1 !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #6B7280 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  text-align: center !important;
+}
+
+.cz-seg-btn.active {
+  background: #FFFFFF !important;
+  color: #4338CA !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.cz-style-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
+  margin-bottom: 14px !important;
+}
+
+.cz-style-tile {
+  height: 38px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid #E5E7EB !important;
+  background: #FFFFFF !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  padding: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+.cz-style-tile:hover {
+  border-color: #A5B4FC !important;
+}
+
+.cz-style-tile.active {
+  border-color: #6366F1 !important;
+  background: #EEF2FF !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+.cz-color-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  margin-bottom: 16px !important;
+}
+
+.cz-color-swatch {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  border: 2px solid transparent !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.cz-color-swatch:hover {
+  transform: scale(1.15) !important;
+}
+
+.cz-color-swatch.active {
+  border-color: #1E1B4B !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3) !important;
+}
+
+.cz-color-swatch span.check {
+  color: #FFFFFF !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
+}
+
+.cz-checklist-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px 12px !important;
+  margin-top: 10px !important;
+}
+
+.cz-checkbox-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 12px !important;
+  color: #374151 !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+}
+
+.cz-checkbox-label input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+  accent-color: #6366F1 !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+}
+
+.cz-reorder-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+  margin-top: 10px !important;
+}
+
+.cz-reorder-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 10px 14px !important;
+  background: #F9FAFB !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  color: #374151 !important;
+  cursor: grab !important;
+  transition: all 0.15s ease !important;
+}
+
+.cz-reorder-item:hover {
+  background: #FFFFFF !important;
+  border-color: #D1D5DB !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+.cz-reorder-handle {
+  color: #9CA3AF !important;
+  margin-right: 8px !important;
+  font-size: 14px !important;
+}
+
 
 
