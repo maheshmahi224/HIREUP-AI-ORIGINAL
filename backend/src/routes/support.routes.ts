@@ -3,6 +3,7 @@ import type { Request, Response } from 'express';
 import { database } from '../db/mongo.js';
 import { env } from '../config/env.js';
 import { authenticate } from '../middleware/auth.js';
+import { sendTicketCreatedEmail } from '../services/email.js';
 import { asyncRoute, ok } from '../utils/http.js';
 import { ObjectId } from 'mongodb';
 
@@ -157,6 +158,11 @@ CRITICAL INSTRUCTIONS:
       await db.collection('supportTickets').insertOne(ticketDoc);
       ticketCreated = { ticketId, subject, status: 'open' };
 
+      // Trigger Email notification to user
+      sendTicketCreatedEmail(userEmail, userName, ticketId, subject).catch((err) =>
+        console.error('[Support] Ticket email send error:', err)
+      );
+
       console.log(`[Support] Ticket created: ${ticketId} for ${userEmail}`);
     }
 
@@ -233,6 +239,10 @@ router.post(
     };
 
     await db.collection('supportTickets').insertOne(ticketDoc);
+
+    sendTicketCreatedEmail(userEmail, userName, ticketId, subject).catch((err) =>
+      console.error('[Support] Ticket email send error:', err)
+    );
 
     return ok(res, { ticket: ticketDoc });
   })

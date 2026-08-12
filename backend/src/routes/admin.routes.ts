@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { database } from '../db/mongo.js';
 import { adminOnly, authenticate } from '../middleware/auth.js';
+import { sendTicketResolvedEmail } from '../services/email.js';
 import { asyncRoute, ok } from '../utils/http.js';
 
 const router = Router();
@@ -114,6 +115,17 @@ router.patch('/support-tickets/:ticketId', asyncRoute(async (req, res) => {
 
   await db.collection('supportTickets').updateOne({ ticketId }, { $set: updateFields });
   const updated = await db.collection('supportTickets').findOne({ ticketId });
+
+  if (updated && status === 'resolved') {
+    const notes = typeof adminNotes === 'string' ? adminNotes : typeof updated.adminNotes === 'string' ? updated.adminNotes : undefined;
+    sendTicketResolvedEmail(
+      String(updated.userEmail),
+      String(updated.userName || 'User'),
+      String(ticketId),
+      String(updated.subject || 'Support Request'),
+      notes
+    ).catch((err) => console.error('[Admin] Failed to send ticket resolution email:', err));
+  }
 
   return ok(res, { ticket: updated });
 }));

@@ -12,6 +12,7 @@ import { AiBuilder } from './pages/AiBuilder.js';
 import { Editor } from './pages/Editor.js';
 import { Resumes } from './pages/Resumes.js';
 import { Support } from './pages/Support.js';
+import { ForgotPassword } from './pages/ForgotPassword.js';
 
 import './styles.css';
 
@@ -30,6 +31,7 @@ function App() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Auth />} />
       <Route path="/signup" element={<Auth signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/builder" element={<Builder />} />
       <Route path="/ai" element={<AiBuilder />} />

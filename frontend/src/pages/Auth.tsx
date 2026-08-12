@@ -169,6 +169,14 @@ export function Auth({ signup = false }: { signup?: boolean }) {
               </div>
             ) : null}
 
+            {!signup && mode === 'password' && (
+              <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 8 }}>
+                <Link to="/forgot-password" style={{ fontSize: '12px', fontWeight: 600, color: '#FF2D55', textDecoration: 'none' }}>
+                  Forgot Password? 🔑
+                </Link>
+              </div>
+            )}
+
             <button className="button" type="submit" disabled={loading} style={{ marginTop: '6px' }}>
               {loading
                 ? 'Processing…'

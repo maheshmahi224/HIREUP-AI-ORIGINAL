@@ -8,4 +8,50 @@ router.post('/otp/request',validate(otpRequestSchema),asyncRoute(async(req,res)=
 router.post('/otp/verify',validate(otpVerifySchema),asyncRoute(async(req,res)=>{const input=getValidated<typeof otpVerifySchema._output>(req); const db=await database(); const otp=await db.collection('otpSessions').findOne({email:input.email,usedAt:{$exists:false},expiresAt:{$gt:new Date()}},{sort:{createdAt:-1}}); if(!otp||otp.attempts>=otp.maxAttempts) return fail(res,401,'OTP_INVALID','Code is invalid or expired'); if(!await bcrypt.compare(input.code,otp.codeHash)){await db.collection('otpSessions').updateOne({_id:otp._id},{$inc:{attempts:1}});return fail(res,401,'OTP_INVALID','Code is invalid or expired');} await db.collection('otpSessions').updateOne({_id:otp._id},{$set:{usedAt:new Date()}}); let user=await db.collection<User>('users').findOne({email:input.email}); if(!user){const now=new Date();const r=await db.collection<User>('users').insertOne({name:input.email.split('@')[0],email:input.email,role:'user',emailVerifiedAt:now,createdAt:now,updatedAt:now});user={_id:r.insertedId,name:input.email.split('@')[0],email:input.email,role:'user',emailVerifiedAt:now,createdAt:now,updatedAt:now};await db.collection('profiles').insertOne({userId:r.insertedId,personal:{email:input.email},sections:{},createdAt:now,updatedAt:now});} await createSession(res,user._id!);return ok(res,{user:{id:user._id,name:user.name,email:user.email,role:user.role}}); }));
 router.get('/google',(_req,res)=>{if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_REDIRECT_URI)return fail(res,503,'GOOGLE_UNAVAILABLE','Google sign in is not configured'); const qs=new URLSearchParams({client_id:env.GOOGLE_CLIENT_ID,redirect_uri:env.GOOGLE_REDIRECT_URI,response_type:'code',scope:'openid email profile',prompt:'select_account'});res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${qs}`);});
 router.get('/google/callback',asyncRoute(async(req,res)=>{const value=typeof req.query.code==='string'?req.query.code:'';if(!value||!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET||!env.GOOGLE_REDIRECT_URI)return fail(res,400,'GOOGLE_INVALID','Unable to complete Google sign-in');const token=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code:value,client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,redirect_uri:env.GOOGLE_REDIRECT_URI,grant_type:'authorization_code'})}).then(r=>r.ok?r.json():null) as {access_token?:string}|null;if(!token?.access_token)return fail(res,401,'GOOGLE_INVALID','Unable to verify Google account');const identity=await fetch('https://openidconnect.googleapis.com/v1/userinfo',{headers:{Authorization:`Bearer ${token.access_token}`}}).then(r=>r.ok?r.json():null) as {sub?:string;email?:string;name?:string}|null;if(!identity?.sub||!identity.email)return fail(res,401,'GOOGLE_INVALID','Unable to verify Google account');const db=await database();let user=await db.collection<User>('users').findOne({$or:[{googleId:identity.sub},{email:identity.email.toLowerCase()}]});if(!user){const now=new Date(),r=await db.collection<User>('users').insertOne({name:identity.name||identity.email.split('@')[0],email:identity.email.toLowerCase(),googleId:identity.sub,role:'user',emailVerifiedAt:now,createdAt:now,updatedAt:now});user={_id:r.insertedId,name:identity.name||identity.email,email:identity.email.toLowerCase(),googleId:identity.sub,role:'user',createdAt:now,updatedAt:now};await db.collection('profiles').insertOne({userId:r.insertedId,personal:{name:user.name,email:user.email},sections:{},createdAt:now,updatedAt:now});}await createSession(res,user._id!);res.redirect(`${env.FRONTEND_ORIGIN}/dashboard`);}));
+
+router.post('/forgot-password/request-otp', asyncRoute(async (req, res) => {
+  const { email: address } = req.body;
+  if (!address || typeof address !== 'string') return fail(res, 400, 'EMAIL_REQUIRED', 'Email address is required');
+  const db = await database();
+  const user = await db.collection<User>('users').findOne({ email: address.toLowerCase().trim() });
+  if (!user) return fail(res, 404, 'USER_NOT_FOUND', 'No account found with this email address');
+  
+  const key = sha(`${req.ip}:${address}`);
+  const recent = await db.collection('otpSessions').countDocuments({ rateKey: key, createdAt: { $gt: new Date(Date.now() - 3600000) } });
+  if (recent >= 5) return fail(res, 429, 'OTP_RATE_LIMIT', 'Too many requests. Please try again later.');
+
+  const value = code(), now = new Date();
+  await db.collection('otpSessions').updateMany({ email: address.toLowerCase().trim(), usedAt: { $exists: false } }, { $set: { usedAt: now } });
+  await db.collection('otpSessions').insertOne({ email: address.toLowerCase().trim(), codeHash: await bcrypt.hash(value, 12), rateKey: key, attempts: 0, maxAttempts: 5, createdAt: now, expiresAt: new Date(Date.now() + 600000) });
+  await sendOtpEmail(address.toLowerCase().trim(), value);
+  return ok(res, { message: 'Password reset OTP code sent to your email.' }, 200);
+}));
+
+router.post('/forgot-password/reset-password', asyncRoute(async (req, res) => {
+  const { email: address, code: inputCode, newPassword } = req.body;
+  if (!address || !inputCode || !newPassword) return fail(res, 400, 'FIELDS_REQUIRED', 'Email, OTP code, and new password are required');
+  if (newPassword.length < 6) return fail(res, 400, 'WEAK_PASSWORD', 'Password must be at least 6 characters');
+
+  const db = await database();
+  const otp = await db.collection('otpSessions').findOne({ email: address.toLowerCase().trim(), usedAt: { $exists: false }, expiresAt: { $gt: new Date() } }, { sort: { createdAt: -1 } });
+  if (!otp || otp.attempts >= otp.maxAttempts) return fail(res, 401, 'OTP_INVALID', 'Invalid or expired OTP code');
+  if (!await bcrypt.compare(inputCode, otp.codeHash)) {
+    await db.collection('otpSessions').updateOne({ _id: otp._id }, { $inc: { attempts: 1 } });
+    return fail(res, 401, 'OTP_INVALID', 'Invalid OTP code');
+  }
+
+  await db.collection('otpSessions').updateOne({ _id: otp._id }, { $set: { usedAt: new Date() } });
+  const newPasswordHash = await bcrypt.hash(newPassword, 12);
+  const now = new Date();
+  await db.collection<User>('users').updateOne({ email: address.toLowerCase().trim() }, { $set: { passwordHash: newPasswordHash, updatedAt: now } });
+
+  const user = await db.collection<User>('users').findOne({ email: address.toLowerCase().trim() });
+  if (user) {
+    await createSession(res, user._id!);
+    return ok(res, { user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+  }
+
+  return ok(res, { message: 'Password reset successfully!' });
+}));
+
 export default router;
