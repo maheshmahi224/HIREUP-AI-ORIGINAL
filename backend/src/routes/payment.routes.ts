@@ -56,7 +56,7 @@ router.post('/create-order', csrf, validate(createOrderSchema), asyncRoute(async
     orderId: order.id,
     amount: order.amount,
     currency: order.currency,
-    keyId: env.RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+    keyId: env.RAZORPAY_KEY_ID || 'rzp_test_SuBwQRESP6b8SB',
   });
 }));
 

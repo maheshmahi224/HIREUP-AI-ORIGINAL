@@ -304,6 +304,7 @@ export function Editor() {
   const [browseTemplatesModal, setBrowseTemplatesModal] = useState(false);
   const [saveState, setSaveState] = useState<'saved' | 'saving' | 'error'>('saved');
   const [paying, setPaying] = useState(false);
+  const [paymentNotice, setPaymentNotice] = useState<{ type: 'success' | 'error'; title: string; message: string } | null>(null);
   const [zoomMode, setZoomMode] = usePersistentState<ZoomMode>('hireup.editor.zoomMode', 'fit');
   const [zoom, setZoom] = usePersistentState('hireup.editor.zoom', 0.7);
   const [activeAiTool, setActiveAiTool] = useState('AI Resume Builder');
@@ -479,13 +480,33 @@ export function Editor() {
       return;
     }
     setPaying(true);
+    setPaymentNotice(null);
     try {
       const order = await api<PaymentOrderInfo>('/payments/create-order', { method: 'POST', body: JSON.stringify({ resumeId: id }) });
       if (order.alreadyPaid) {
         commit({ ...draft, paymentState: 'paid' });
         setPaying(false);
+        window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
         return;
       }
+
+      // Handle dev order fallback gracefully
+      if (order.orderId.startsWith('order_dev_')) {
+        await api('/payments/verify', {
+          method: 'POST',
+          body: JSON.stringify({ resumeId: id, orderId: order.orderId, paymentId: `pay_dev_${Date.now()}`, signature: 'dev_signature' }),
+        });
+        commit({ ...draft, paymentState: 'paid' });
+        setPaying(false);
+        setPaymentNotice({
+          type: 'success',
+          title: 'Payment Complete! 🎉',
+          message: 'Download unlocked. Opening your PDF...',
+        });
+        window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
+        return;
+      }
+
       if (!window.Razorpay) {
         const script = document.createElement('script');
         script.src = 'https://checkout.razorpay.com/v1/checkout.js';
@@ -494,7 +515,8 @@ export function Editor() {
           script.onload = () => resolve();
         });
       }
-      new window.Razorpay({
+
+      const rzp = new window.Razorpay({
         key: order.keyId,
         amount: order.amount,
         currency: order.currency,
@@ -502,19 +524,63 @@ export function Editor() {
         description: 'Resume Download Fee',
         order_id: order.orderId,
         handler: async (response: any) => {
-          await api('/payments/verify', {
-            method: 'POST',
-            body: JSON.stringify({ resumeId: id, orderId: response.razorpay_order_id, paymentId: response.razorpay_payment_id, signature: response.razorpay_signature }),
-          });
-          commit({ ...draft, paymentState: 'paid' });
-          setPaying(false);
-          window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
+          try {
+            await api('/payments/verify', {
+              method: 'POST',
+              body: JSON.stringify({
+                resumeId: id,
+                orderId: response.razorpay_order_id,
+                paymentId: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              }),
+            });
+            commit({ ...draft, paymentState: 'paid' });
+            setPaying(false);
+            setPaymentNotice({
+              type: 'success',
+              title: 'Payment Successful! 🎉',
+              message: 'Your resume download has been unlocked.',
+            });
+            window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
+          } catch {
+            setPaying(false);
+            setPaymentNotice({
+              type: 'error',
+              title: 'Verification Failed ⚠️',
+              message: 'Payment verification failed. Download is locked until payment is verified.',
+            });
+          }
         },
-        modal: { ondismiss: () => setPaying(false) },
+        modal: {
+          ondismiss: () => {
+            setPaying(false);
+            setPaymentNotice({
+              type: 'error',
+              title: 'Payment Cancelled ⚠️',
+              message: 'Payment window was closed. Download is only allowed after successful payment of ₹30.',
+            });
+          },
+        },
         theme: { color: '#FF2D55' },
-      }).open();
-    } catch {
+      });
+
+      rzp.on('payment.failed', (response: any) => {
+        setPaying(false);
+        setPaymentNotice({
+          type: 'error',
+          title: 'Payment Failed ❌',
+          message: response.error?.description || 'Payment was unsuccessful. Please try again to unlock download.',
+        });
+      });
+
+      rzp.open();
+    } catch (err) {
       setPaying(false);
+      setPaymentNotice({
+        type: 'error',
+        title: 'Unable to start payment ⚠️',
+        message: err instanceof Error ? err.message : 'An error occurred initializing payment. Please try again.',
+      });
     }
   };
 
@@ -1659,6 +1725,26 @@ export function Editor() {
                   {item.label}
                 </button>
               ))}
+            </div>
+          </div>
+        )}
+
+        {/* Payment Result Notification Modal */}
+        {paymentNotice && (
+          <div className="modal-backdrop" role="presentation" onClick={() => setPaymentNotice(null)}>
+            <div className="modal-content text-center" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ fontSize: 44, marginBottom: 12 }}>
+                {paymentNotice.type === 'success' ? '🎉' : '⚠️'}
+              </div>
+              <h3 style={{ fontSize: 20, margin: '0 0 8px', color: paymentNotice.type === 'success' ? '#059669' : '#DC2626' }}>
+                {paymentNotice.title}
+              </h3>
+              <p style={{ fontSize: 14, color: '#4B5563', margin: '0 0 20px', lineHeight: 1.5 }}>
+                {paymentNotice.message}
+              </p>
+              <button type="button" className="button" style={{ width: '100%' }} onClick={() => setPaymentNotice(null)}>
+                Got it
+              </button>
             </div>
           </div>
         )}
