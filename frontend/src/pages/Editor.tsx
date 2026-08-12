@@ -1428,11 +1428,30 @@ export function Editor() {
 
   return (
     <Shell fullBleed>
-      <div className="v2-editor-root">
+      <div className={`v2-editor-root ${mobileView === 'preview' ? 'v2-show-preview' : 'v2-show-editor'}`}>
         {/* Top Toolbar Header */}
         <header className="v2-toolbar">
           <div className="v2-toolbar-left">
             <Link to="/dashboard" className="v2-back-link">← Dashboard</Link>
+            
+            {/* Mobile View Segmented Switcher */}
+            <div className="v2-mobile-view-toggle">
+              <button
+                type="button"
+                className={mobileView === 'editor' ? 'active' : ''}
+                onClick={() => setMobileView('editor')}
+              >
+                ✏️ Edit
+              </button>
+              <button
+                type="button"
+                className={mobileView === 'preview' ? 'active' : ''}
+                onClick={() => setMobileView('preview')}
+              >
+                📄 Preview
+              </button>
+            </div>
+
             <div className="v2-undo-redo">
               <button type="button" disabled={!history.current.length} onClick={undo}>↩</button>
               <button type="button" disabled={!future.current.length} onClick={redo}>↪</button>
@@ -1517,6 +1536,13 @@ export function Editor() {
           <main className="v2-preview-panel">
             <A4Preview draft={draft} customization={customization} zoomMode={zoomMode} zoom={zoom} onFit={setZoom} />
           </main>
+        </div>
+
+        {/* Mobile Floating Download Bar */}
+        <div className="v2-mobile-floating-bar">
+          <button type="button" className="v2-btn-pink" style={{ flex: 1, height: '44px' }} onClick={download} disabled={paying}>
+            {isCurrentStatePaid ? 'Download PDF 📥' : 'Download PDF 📥 (₹30)'}
+          </button>
         </div>
 
         {/* Modal Notice */}
