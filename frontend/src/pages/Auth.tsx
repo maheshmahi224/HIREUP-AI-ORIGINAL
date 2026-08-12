@@ -12,6 +12,7 @@ export function Auth({ signup = false }: { signup?: boolean }) {
   const [name, setName] = useState('');
   const [mode, setMode] = useState<'password' | 'otp'>('password');
   const [code, setCode] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
@@ -27,20 +28,26 @@ export function Auth({ signup = false }: { signup?: boolean }) {
 
     try {
       if (mode === 'otp') {
-        if (!code.trim()) {
+        if (!otpSent) {
           await api('/auth/otp/request', {
             method: 'POST',
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({ email: email.trim() }),
           });
           setInfo('Verification code sent to your email.');
-          setCode(' '); // Prompt for code
+          setOtpSent(true);
+          setLoading(false);
+          return;
+        }
+
+        if (!code.trim()) {
+          setError('Please enter the 6-digit verification code');
           setLoading(false);
           return;
         }
 
         const res = await api<Session>('/auth/otp/verify', {
           method: 'POST',
-          body: JSON.stringify({ email, code: code.trim() }),
+          body: JSON.stringify({ email: email.trim(), code: code.trim() }),
         });
         if (res?.csrfToken) setCsrf(res.csrfToken);
       } else {
@@ -143,31 +150,57 @@ export function Auth({ signup = false }: { signup?: boolean }) {
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required placeholder="you@example.com" />
             </div>
 
-            {mode === 'password' ? (
+             {mode === 'password' ? (
               <div>
                 <label>Password</label>
                 <input
                   type="password"
-                  minLength={12}
+                  minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="At least 12 characters"
+                  placeholder="At least 6 characters"
                 />
               </div>
-            ) : code.trim() ? (
+            ) : (
               <div>
                 <label>6-Digit Verification Code</label>
                 <input
+                  type="text"
                   inputMode="numeric"
-                  pattern="[0-9]{6}"
-                  value={code.trim()}
-                  onChange={(e) => setCode(e.target.value)}
-                  required
+                  maxLength={6}
+                  value={code}
+                  onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+                  required={otpSent}
                   placeholder="123456"
+                  style={{ letterSpacing: '0.25em', fontSize: '18px', fontWeight: 800, textAlign: 'center' }}
                 />
+                {otpSent && (
+                  <div style={{ textAlign: 'right', marginTop: '4px' }}>
+                    <button
+                      type="button"
+                      className="text-button"
+                      style={{ fontSize: '11px', color: '#FF2D55', background: 'transparent', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                      onClick={async () => {
+                        setError('');
+                        setInfo('');
+                        try {
+                          await api('/auth/otp/request', {
+                            method: 'POST',
+                            body: JSON.stringify({ email: email.trim() }),
+                          });
+                          setInfo('A fresh 6-digit verification code has been sent to your email.');
+                        } catch (err: any) {
+                          setError(err?.message || 'Failed to resend code.');
+                        }
+                      }}
+                    >
+                      Resend Code 🔄
+                    </button>
+                  </div>
+                )}
               </div>
-            ) : null}
+            )}
 
             {!signup && mode === 'password' && (
               <div style={{ textAlign: 'right', marginTop: -4, marginBottom: 8 }}>
@@ -181,9 +214,9 @@ export function Auth({ signup = false }: { signup?: boolean }) {
               {loading
                 ? 'Processing…'
                 : mode === 'otp'
-                ? code.trim()
-                  ? 'Verify and continue'
-                  : 'Send email code'
+                ? otpSent
+                  ? 'Verify Code & Log In ➔'
+                  : 'Send Email Verification Code ➔'
                 : signup
                 ? 'Create account'
                 : 'Log in'}
@@ -196,10 +229,12 @@ export function Auth({ signup = false }: { signup?: boolean }) {
               onClick={() => {
                 setMode(mode === 'otp' ? 'password' : 'otp');
                 setCode('');
+                setOtpSent(false);
                 setError('');
+                setInfo('');
               }}
             >
-              {mode === 'otp' ? 'Use password instead' : 'Log in with email code (OTP)'}
+              {mode === 'otp' ? 'Use password instead' : 'Sign in with email OTP code'}
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '4px 0' }}>
