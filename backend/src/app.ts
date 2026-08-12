@@ -10,6 +10,7 @@ import profileRoutes from './routes/profile.routes.js';
 import resumeRoutes from './routes/resume.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
+import webhookRoutes from './routes/webhook.routes.js';
 import pdfRoutes from './routes/pdf.routes.js';
 import { errorHandler, ok } from './utils/http.js';
 
@@ -29,6 +30,9 @@ app.use(
     credentials: true,
   })
 );
+// Webhook route MUST be before express.json() — raw body needed for HMAC verification
+app.use('/api/webhook', webhookRoutes);
+
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 
