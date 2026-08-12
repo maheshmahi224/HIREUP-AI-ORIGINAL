@@ -46,18 +46,21 @@ export function AiBuilder() {
 
   return (
     <Shell>
-      <div className="builder-start" style={{ maxWidth: '800px', margin: '40px auto' }}>
-        <p className="eyebrow">AI RESUME BUILDER</p>
-        <h1>Dump everything you know about yourself.</h1>
-        <p style={{ color: 'var(--color-text-secondary)' }}>
-          Paste messy notes about your education, work history, projects, and skills. Our AI extracts structured details without fabricating credentials.
-        </p>
+      <div className="v2-ai-builder-container">
+        <div className="v2-ai-builder-head">
+          <p className="eyebrow">AI RESUME BUILDER</p>
+          <h1>Dump everything you know about yourself.</h1>
+          <p className="lead-text">
+            Paste messy notes about your education, work history, projects, and skills. Our AI extracts structured details without fabricating credentials.
+          </p>
+        </div>
 
         {!extracted ? (
-          <div className="card" style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <label>Your Natural Career Notes</label>
+          <div className="card v2-ai-input-card">
+            <label className="v2-input-label">Your Natural Career Notes</label>
             <textarea
-              rows={10}
+              className="v2-ai-textarea"
+              rows={9}
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
               placeholder={`Example:\n"I am Mahesh Kumar, final year B.Tech CS student at DTU. Phone: 9876543210. Email: mahesh@example.com. Built a campus portal using React, Node.js and MongoDB. Worked as Frontend Intern at TechCorp for 3 months. Skills: JavaScript, TypeScript, React, Python."`}
@@ -66,7 +69,7 @@ export function AiBuilder() {
             {extractMutation.error && <div className="alert alert-danger">{extractMutation.error.message}</div>}
 
             <button
-              className="button"
+              className="button v2-ai-cta-btn"
               onClick={() => extractMutation.mutate()}
               disabled={extractMutation.isPending || rawText.trim().length < 10}
             >
@@ -74,9 +77,9 @@ export function AiBuilder() {
             </button>
           </div>
         ) : (
-          <div className="card" style={{ marginTop: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h2 style={{ fontSize: '20px', margin: 0 }}>Review AI Extraction Results</h2>
+          <div className="card v2-ai-results-card">
+            <div className="v2-ai-results-head">
+              <h2>Review AI Extraction Results</h2>
               <button className="text-button" onClick={() => setExtracted(null)}>
                 ← Edit notes
               </button>
@@ -93,14 +96,14 @@ export function AiBuilder() {
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div className="v2-ai-fields-grid">
               <div>
-                <label>Resume Title</label>
-                <input value={title} onChange={(e) => setTitle(e.target.value)} />
+                <label className="v2-input-label">Resume Title</label>
+                <input className="v2-input-field" value={title} onChange={(e) => setTitle(e.target.value)} />
               </div>
               <div>
-                <label>Template Choice</label>
-                <select value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
+                <label className="v2-input-label">Template Choice</label>
+                <select className="v2-select-field" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
                   <option value="azurill">Azurill (Vibrant)</option>
                   <option value="classic">Classic (ATS standard)</option>
                   <option value="modern">Modern (Sans-serif)</option>
@@ -110,19 +113,19 @@ export function AiBuilder() {
               </div>
             </div>
 
-            <div style={{ background: 'var(--color-bg-subtle)', padding: '16px', borderRadius: 'var(--radius-md)', fontSize: '13px' }}>
-              <b>Extracted Personal Name:</b> {extracted.personal.name || 'Not provided'}<br />
-              <b>Extracted Contact Email:</b> {extracted.personal.email || 'Not provided'}<br />
-              <b>Extracted Skills ({extracted.skills.length}):</b> {extracted.skills.join(', ') || 'None'}<br />
-              <b>Education Entries:</b> {extracted.education.length}<br />
-              <b>Experience Entries:</b> {extracted.experience.length}<br />
-              <b>Projects Found:</b> {extracted.projects.length}
+            <div className="v2-ai-summary-box">
+              <div className="v2-summary-item"><strong>Name:</strong> {extracted.personal.name || 'Not provided'}</div>
+              <div className="v2-summary-item"><strong>Email:</strong> {extracted.personal.email || 'Not provided'}</div>
+              <div className="v2-summary-item"><strong>Skills ({extracted.skills.length}):</strong> {extracted.skills.join(', ') || 'None'}</div>
+              <div className="v2-summary-item"><strong>Education:</strong> {extracted.education.length} entries</div>
+              <div className="v2-summary-item"><strong>Experience:</strong> {extracted.experience.length} entries</div>
+              <div className="v2-summary-item"><strong>Projects:</strong> {extracted.projects.length} entries</div>
             </div>
 
             {saveResumeMutation.error && <div className="alert alert-danger">{saveResumeMutation.error.message}</div>}
 
             <button
-              className="button"
+              className="button v2-ai-cta-btn"
               onClick={() => saveResumeMutation.mutate()}
               disabled={saveResumeMutation.isPending}
             >

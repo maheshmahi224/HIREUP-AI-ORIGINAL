@@ -51,8 +51,25 @@ app.use(
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   })
 );
+
+// Explicit OPTIONS handler so Vercel serverless does not drop preflight
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS: Origin ${origin} not allowed`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  optionsSuccessStatus: 204,
+}));
 // Webhook route MUST be before express.json() — raw body needed for HMAC verification
 app.use('/api/webhook', webhookRoutes);
 

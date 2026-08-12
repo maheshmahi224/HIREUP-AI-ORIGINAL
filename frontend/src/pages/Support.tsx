@@ -125,7 +125,7 @@ export function Support() {
       <div className="v2-support-container">
         {/* Support Header */}
         <div className="v2-support-header">
-          <div className="v2-support-badge">24/7 AI Support & Admin Escalation</div>
+          <span className="v2-support-pill-badge">24/7 AI SUPPORT & ADMIN ESCALATION</span>
           <h1>HireUp Support & Help Center</h1>
           <p>Get instant answers about orders, payments, and PDF exports, or email us directly at <strong>support.hireupai@gmail.com</strong>.</p>
         </div>
@@ -134,14 +134,14 @@ export function Support() {
         <div className="v2-support-tabs">
           <button
             type="button"
-            className={activeTab === 'chat' ? 'active' : ''}
+            className={`v2-tab-btn ${activeTab === 'chat' ? 'active' : ''}`}
             onClick={() => setActiveTab('chat')}
           >
             💬 Smart AI Support Chat
           </button>
           <button
             type="button"
-            className={activeTab === 'tickets' ? 'active' : ''}
+            className={`v2-tab-btn ${activeTab === 'tickets' ? 'active' : ''}`}
             onClick={() => setActiveTab('tickets')}
           >
             📋 My Support Tickets ({ticketsQuery.data?.tickets?.length || 0})
@@ -151,20 +151,22 @@ export function Support() {
         {activeTab === 'chat' && (
           <div className="v2-chat-section">
             {/* Quick Question Chips */}
-            <div className="v2-quick-chips">
-              <span>Quick Help:</span>
-              <button type="button" onClick={() => sendMessage('Where is my downloaded PDF?')}>
-                📥 Download PDF Issue
-              </button>
-              <button type="button" onClick={() => sendMessage('Why is payment showing pending?')}>
-                💳 Payment Status
-              </button>
-              <button type="button" onClick={() => sendMessage('I want to request a refund for order')}>
-                💰 Refund Request
-              </button>
-              <button type="button" onClick={() => sendMessage('How does AI Resume Extractor work?')}>
-                ⚡ AI Extractor Help
-              </button>
+            <div className="v2-quick-chips-wrapper">
+              <span className="v2-quick-chips-label">QUICK HELP:</span>
+              <div className="v2-quick-chips">
+                <button type="button" className="v2-chip-btn" onClick={() => sendMessage('Where is my downloaded PDF?')}>
+                  📥 Download PDF Issue
+                </button>
+                <button type="button" className="v2-chip-btn" onClick={() => sendMessage('Why is payment showing pending?')}>
+                  💳 Payment Status
+                </button>
+                <button type="button" className="v2-chip-btn" onClick={() => sendMessage('I want to request a refund for order')}>
+                  💰 Refund Request
+                </button>
+                <button type="button" className="v2-chip-btn" onClick={() => sendMessage('How does AI Resume Extractor work?')}>
+                  ⚡ AI Extractor Help
+                </button>
+              </div>
             </div>
 
             {/* Chat Messages Box */}

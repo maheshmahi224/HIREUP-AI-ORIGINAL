@@ -33,12 +33,23 @@ const client = new QueryClient({
 
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+
+  // ✅ ALL HOOKS MUST BE AT TOP — before any early returns
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   const session = useQuery({
     queryKey: ['session'],
     queryFn: () => api<{ user: { name: string; role: string }; csrfToken: string }>('/auth/session'),
     retry: false,
   });
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Early returns AFTER all hooks
   if (session.isLoading) return <p style={{ padding: '48px', textAlign: 'center' }}>Checking access…</p>;
   if (!session.data) return <Navigate to="/login" replace />;
 
@@ -53,14 +64,6 @@ function Layout({ children }: { children: React.ReactNode }) {
   }
 
   const isCurrent = (path: string) => (location.pathname === path ? 'active' : '');
-
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false); };
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, []);
 
   return (
     <div className="layout">

@@ -4,6 +4,18 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, type Resume } from '../api/client.js';
 import { Shell } from '../components/Shell.js';
 
+function formatDate(dateStr: string) {
+  try {
+    const d = new Date(dateStr);
+    const day = d.getDate();
+    const month = d.toLocaleString('en-US', { month: 'short' });
+    const time = d.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    return `${day} ${month} · ${time}`;
+  } catch {
+    return dateStr;
+  }
+}
+
 export function Resumes() {
   const queryClient = useQueryClient();
 
@@ -30,10 +42,10 @@ export function Resumes() {
         <div className="page-head">
           <div>
             <p className="eyebrow">SAVED RESUMES</p>
-            <h1>Manage your resumes.</h1>
+            <h1>Manage your resumes</h1>
             <p>Your work is saved automatically. Edit or duplicate tailored versions for different applications.</p>
           </div>
-          <Link className="button" to="/builder">
+          <Link className="button mobile-full-btn" to="/builder">
             + New Resume
           </Link>
         </div>
@@ -41,45 +53,50 @@ export function Resumes() {
         {resumesQuery.isLoading ? (
           <div style={{ padding: '48px', textAlign: 'center', color: 'var(--color-text-muted)' }}>Loading saved resumes…</div>
         ) : resumes.length > 0 ? (
-          <div style={{ display: 'grid', gap: '12px' }}>
+          <div className="resume-card-list">
             {resumes.map((r) => (
-              <div key={r._id} className="card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 24px' }}>
-                <div>
-                  <h3 style={{ margin: '0 0 4px', fontSize: '16px' }}>{r.title}</h3>
-                  <div style={{ display: 'flex', gap: '12px', fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    <span>Updated {new Date(r.updatedAt).toLocaleString()}</span>
-                    <span>•</span>
-                    <span style={{ textTransform: 'capitalize' }}>Template: {r.templateId}</span>
-                    <span>•</span>
-                    <span className={`badge ${r.paymentState === 'paid' ? 'paid' : 'unpaid'}`}>
-                      {r.paymentState === 'paid' ? 'Paid' : 'Preview only'}
-                    </span>
+              <div key={r._id} className="resume-list-item-card">
+                <div className="resume-item-top">
+                  <div className="resume-item-header-info">
+                    <h3 className="resume-item-title">{r.title}</h3>
+                    <div className="resume-item-template">
+                      Template: <span className="template-name">{r.templateId || 'Classic'}</span>
+                    </div>
+                  </div>
+                  <div className="resume-item-top-actions">
+                    <button
+                      className="icon-action-btn"
+                      title="Duplicate Resume"
+                      onClick={() => duplicateMutation.mutate(r._id)}
+                      disabled={duplicateMutation.isPending}
+                    >
+                      📋
+                    </button>
+                    <button
+                      className="icon-action-btn danger"
+                      title="Delete Resume"
+                      onClick={() => {
+                        if (confirm(`Delete "${r.title}"? This action cannot be undone.`)) {
+                          deleteMutation.mutate(r._id);
+                        }
+                      }}
+                    >
+                      🗑️
+                    </button>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <Link to={`/editor/${r._id}`} className="button secondary" style={{ height: '36px', padding: '0 12px', fontSize: '13px' }}>
-                    Edit
+                <div className="resume-item-meta-row">
+                  <span className="resume-item-timestamp">Updated {formatDate(r.updatedAt)}</span>
+                  <span className={`badge ${r.paymentState === 'paid' ? 'paid' : 'unpaid'}`}>
+                    {r.paymentState === 'paid' ? '✓ Paid' : 'Preview only'}
+                  </span>
+                </div>
+
+                <div className="resume-item-action-row">
+                  <Link to={`/editor/${r._id}`} className="button secondary resume-edit-btn">
+                    Edit Resume →
                   </Link>
-                  <button
-                    className="text-button"
-                    style={{ fontSize: '13px' }}
-                    onClick={() => duplicateMutation.mutate(r._id)}
-                    disabled={duplicateMutation.isPending}
-                  >
-                    Duplicate
-                  </button>
-                  <button
-                    className="text-button"
-                    style={{ color: 'var(--color-danger)', fontSize: '13px' }}
-                    onClick={() => {
-                      if (confirm(`Delete "${r.title}"? This action cannot be undone.`)) {
-                        deleteMutation.mutate(r._id);
-                      }
-                    }}
-                  >
-                    Delete
-                  </button>
                 </div>
               </div>
             ))}
@@ -99,3 +116,4 @@ export function Resumes() {
     </Shell>
   );
 }
+
