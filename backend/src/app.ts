@@ -1,8 +1,8 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import { default as helmet } from 'helmet';
+import { rateLimit } from 'express-rate-limit';
 import { env } from './config/env.js';
 import adminRoutes from './routes/admin.routes.js';
 import authRoutes from './routes/auth.routes.js';
@@ -40,3 +40,5 @@ app.use('/api/pdf', pdfRoutes);
 app.use('/api/admin', adminRoutes);
 
 app.use(errorHandler);
+
+export default app;
