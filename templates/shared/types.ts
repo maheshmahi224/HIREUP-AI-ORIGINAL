@@ -142,6 +142,18 @@ export interface HireUpCustomization {
   fontFamily: string;
 
   // ── Colors ────────────────────────────────────────────
+  primaryColor?: string;
+  entryHeaderOffset?: number;
+  sectionSpacing?: number;
+  marginHorizontal?: number;
+  marginVertical?: number;
+  datePosition?: 'right' | 'below';
+  entryHeaderSplit?: 'auto' | 'manual';
+  headingStyle?: number;
+  headingCase?: 'capitalize' | 'uppercase';
+  headingIcons?: 'none' | 'outline' | 'filled';
+  headerFontFamily?: string;
+  headerAlign?: 'left' | 'center';
   colorArea: 'full' | 'header' | 'border';
   colorType: 'single' | 'multi' | 'image';
   colorsMode: 'basic' | 'advanced';

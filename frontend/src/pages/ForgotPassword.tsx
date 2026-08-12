@@ -1,3 +1,6 @@
+import React, { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../api/client.js';
 import { BrandLogo } from '../components/BrandLogo.js';
 
 export function ForgotPassword() {
@@ -188,7 +191,7 @@ export function ForgotPassword() {
             <p className="award-subtitle">We sent a 6-digit code to <strong>{email}</strong></p>
 
             <div className="award-otp-grid" onPaste={handlePaste}>
-              {otpDigits.map((digit, idx) => (
+              {otpDigits.map((digit: string, idx: number) => (
                 <input
                   key={idx}
                   ref={digitRefs[idx]}

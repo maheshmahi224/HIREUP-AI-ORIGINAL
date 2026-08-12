@@ -269,6 +269,7 @@ export function Editor() {
   const [aiGrammarText, setAiGrammarText] = useState('');
   const [aiTargetLang, setAiTargetLang] = useState('French');
   const [aiCoverTone, setAiCoverTone] = useState<'professional'|'enthusiastic'|'concise'>('professional');
+  const [mobileView, setMobileView] = useState<'editor' | 'preview'>('editor');
 
   const history = useRef<Resume[]>([]);
   const future = useRef<Resume[]>([]);
