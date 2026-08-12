@@ -32,14 +32,18 @@ router.post('/extract', csrf, validate(extractSchema), asyncRoute(async (req, re
 
   const extracted = await extractResumeDataWithAI(rawInput);
 
-  // Store usage telemetry
-  await db.collection('aiGenerations').insertOne({
-    userId,
-    rawInputLength: rawInput.length,
-    missingFieldsCount: extracted.missingFields.length,
-    extractedSections: Object.keys(extracted).filter(k => k !== 'missingFields'),
-    createdAt: new Date(),
-  });
+  // Store usage telemetry safely without blocking response
+  try {
+    await db.collection('aiGenerations').insertOne({
+      userId,
+      rawInputLength: rawInput.length,
+      missingFieldsCount: extracted.missingFields.length,
+      extractedSections: Object.keys(extracted).filter(k => k !== 'missingFields'),
+      createdAt: new Date(),
+    });
+  } catch (telemetryErr) {
+    console.error('[AI Router] Telemetry write warning:', telemetryErr);
+  }
 
   return ok(res, { extracted });
 }));

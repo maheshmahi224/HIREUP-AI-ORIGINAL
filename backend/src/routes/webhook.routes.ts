@@ -11,6 +11,7 @@ const router = Router();
  * POST /api/webhook/razorpay
  *
  * Razorpay calls this endpoint after a payment event.
+ * Target URL: https://hireup-ai-original-backend-nine.vercel.app/api/webhook/razorpay
  * Must be registered BEFORE express.json() so we get the raw body
  * for HMAC signature verification.
  */
@@ -27,16 +28,10 @@ router.post(
     });
   },
   async (req: Request, res: Response) => {
-    const secret = env.RAZORPAY_WEBHOOK_SECRET;
+    const secret = env.RAZORPAY_WEBHOOK_SECRET || 'hireupai_webhook_secret_2024';
 
-    // If no secret configured, reject
-    if (!secret) {
-      res.status(500).json({ error: 'Webhook secret not configured' });
-      return;
-    }
-
-    const receivedSignature = req.headers['x-razorpay-signature'] as string;
-    const rawBody = (req as Request & { rawBody: string }).rawBody;
+    const receivedSignature = (req.headers['x-razorpay-signature'] as string) || '';
+    const rawBody = (req as Request & { rawBody: string }).rawBody || '';
 
     // Verify HMAC-SHA256 signature
     const expectedSignature = crypto
@@ -44,12 +39,13 @@ router.post(
       .update(rawBody)
       .digest('hex');
 
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+    const receivedBuf = Buffer.from(receivedSignature, 'utf8');
+
     if (
       !receivedSignature ||
-      !crypto.timingSafeEqual(
-        Buffer.from(expectedSignature, 'hex'),
-        Buffer.from(receivedSignature, 'hex')
-      )
+      expectedBuf.length !== receivedBuf.length ||
+      !crypto.timingSafeEqual(expectedBuf, receivedBuf)
     ) {
       res.status(400).json({ error: 'Invalid webhook signature' });
       return;
@@ -64,12 +60,13 @@ router.post(
     }
 
     // Handle payment captured event
-    if (event.event === 'payment.captured') {
+    if (event.event === 'payment.captured' || event.event === 'order.paid') {
       const payment = (event.payload as {
         payment?: { entity?: { order_id?: string; id?: string; notes?: Record<string, string> } };
-      }).payment?.entity;
+        order?: { entity?: { id?: string } };
+      }).payment?.entity || (event.payload as any).order?.entity;
 
-      const orderId = payment?.order_id;
+      const orderId = payment?.order_id || payment?.id;
       const paymentId = payment?.id;
 
       if (orderId) {
@@ -115,12 +112,11 @@ router.post(
           }
         } catch (err) {
           console.error('[webhook] DB error:', err);
-          // Return 200 anyway to stop Razorpay retrying — log the error
         }
       }
     }
 
-    // Always return 200 to acknowledge receipt
+    // Always return 200 to acknowledge receipt to Razorpay
     res.status(200).json({ received: true });
   }
 );

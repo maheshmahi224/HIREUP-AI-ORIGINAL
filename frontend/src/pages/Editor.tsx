@@ -4,6 +4,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, apiBase, type PaymentOrderInfo, type Resume } from '../api/client.js';
 import { Shell } from '../components/Shell.js';
 import { ResumeRenderer, TEMPLATES_META, defaultCustomization, type HireUpCustomization } from '../../../templates/index.js';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 declare global {
   interface Window {
@@ -482,54 +484,72 @@ export function Editor() {
     updateList(key, [...items.slice(0, index + 1), { ...clone(item), id: ids() }, ...items.slice(index + 1)]);
   };
 
-  const printResume = () => {
-    // Temporarily strip zoom inline styles so the CSS @media print rules take effect cleanly
-    const slot = document.querySelector<HTMLElement>('.resume-paper-slot');
+  const exportPdf = async () => {
     const paper = document.querySelector<HTMLElement>('.resume-paper');
-    const slotW = slot?.style.width ?? '';
-    const slotH = slot?.style.height ?? '';
-    const paperTransform = paper?.style.transform ?? '';
-    if (slot) { slot.style.width = ''; slot.style.height = ''; }
-    if (paper) { paper.style.transform = 'none'; }
-    window.print();
-    // Restore after print dialog closes
-    setTimeout(() => {
-      if (slot) { slot.style.width = slotW; slot.style.height = slotH; }
-      if (paper) { paper.style.transform = paperTransform; }
-    }, 500);
+    if (!paper) {
+      window.print();
+      return;
+    }
+
+    // Temporarily reset inline zoom transform for high-res capture
+    const slot = document.querySelector<HTMLElement>('.resume-paper-slot');
+    const origWidth = slot?.style.width ?? '';
+    const origHeight = slot?.style.height ?? '';
+    const origTransform = paper.style.transform;
+
+    if (slot) {
+      slot.style.width = '794px';
+      slot.style.height = '1123px';
+    }
+    paper.style.transform = 'none';
+
+    try {
+      const canvas = await html2canvas(paper, {
+        scale: 2.5,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+      pdf.save(`${draft?.title || 'Resume'}.pdf`);
+    } catch (err) {
+      console.error('HTML5 PDF export error, falling back to window.print():', err);
+      window.print();
+    } finally {
+      if (slot) {
+        slot.style.width = origWidth;
+        slot.style.height = origHeight;
+      }
+      paper.style.transform = origTransform;
+    }
   };
 
   const download = async () => {
     if (!draft) return;
     if (draft.paymentState === 'paid') {
-      printResume();
+      await exportPdf();
       return;
     }
     setPaying(true);
     setPaymentNotice(null);
     try {
-      const order = await api<PaymentOrderInfo>('/payments/create-order', { method: 'POST', body: JSON.stringify({ resumeId: id }) });
+      const order = await api<PaymentOrderInfo>('/payments/create-order', {
+        method: 'POST',
+        body: JSON.stringify({ resumeId: id }),
+      });
+
       if (order.alreadyPaid) {
         commit({ ...draft, paymentState: 'paid' });
         setPaying(false);
-        printResume();
-        return;
-      }
-
-      // Handle dev order fallback gracefully
-      if (order.orderId.startsWith('order_dev_')) {
-        await api('/payments/verify', {
-          method: 'POST',
-          body: JSON.stringify({ resumeId: id, orderId: order.orderId, paymentId: `pay_dev_${Date.now()}`, signature: 'dev_signature' }),
-        });
-        commit({ ...draft, paymentState: 'paid' });
-        setPaying(false);
-        setPaymentNotice({
-          type: 'success',
-          title: 'Payment Complete! 🎉',
-          message: 'Download unlocked! Opening PDF save window...',
-        });
-        printResume();
+        await exportPdf();
         return;
       }
 
@@ -547,7 +567,7 @@ export function Editor() {
         amount: order.amount,
         currency: order.currency,
         name: 'HireUp AI',
-        description: 'Resume Download Fee',
+        description: 'Resume Premium Export Fee',
         order_id: order.orderId,
         handler: async (response: any) => {
           try {
@@ -567,7 +587,7 @@ export function Editor() {
               title: 'Payment Successful! 🎉',
               message: 'Your resume download has been unlocked.',
             });
-            printResume();
+            await exportPdf();
           } catch {
             setPaying(false);
             setPaymentNotice({
@@ -583,33 +603,23 @@ export function Editor() {
             setPaymentNotice({
               type: 'error',
               title: 'Payment Cancelled ⚠️',
-              message: 'Payment window was closed. Download is only allowed after successful payment of ₹30.',
+              message: 'Payment window was closed. Download requires a ₹30 payment.',
             });
           },
         },
         theme: { color: '#FF2D55' },
       });
 
-      rzp.on('payment.failed', (response: any) => {
-        setPaying(false);
-        setPaymentNotice({
-          type: 'error',
-          title: 'Payment Failed ❌',
-          message: response.error?.description || 'Payment was unsuccessful. Please try again to unlock download.',
-        });
-      });
-
       rzp.open();
-    } catch (err) {
+    } catch (err: any) {
       setPaying(false);
       setPaymentNotice({
         type: 'error',
-        title: 'Unable to start payment ⚠️',
-        message: err instanceof Error ? err.message : 'An error occurred initializing payment. Please try again.',
+        title: 'Payment Error ⚠️',
+        message: err?.message || 'Unable to open payment gateway. Please try again.',
       });
     }
   };
-
 
   if (!draft) {
     return (
@@ -1749,6 +1759,11 @@ export function Editor() {
           </IconButton>
         </div>
         <div className="context-body">
+          {rightPanel === 'settings' && (
+            <div className="settings-drawer-content">
+              {renderCustomize()}
+            </div>
+          )}
           {rightPanel === 'ats' && (
             <div className="ats-list">
               <b>{completion}% Complete</b>
@@ -1985,3 +2000,4 @@ export function Editor() {
     </Shell>
   );
 }
+

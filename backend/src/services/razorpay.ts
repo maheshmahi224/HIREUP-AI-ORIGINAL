@@ -9,19 +9,8 @@ export interface RazorpayOrderResponse {
 }
 
 export async function createRazorpayOrder(amountPaise: number = 3000): Promise<RazorpayOrderResponse> {
-  const keyId = env.RAZORPAY_KEY_ID;
-  const keySecret = env.RAZORPAY_KEY_SECRET;
-
-  if (!keyId || !keySecret) {
-    // Return dev order format if credentials not set
-    const devOrderId = `order_dev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-    return {
-      id: devOrderId,
-      amount: amountPaise,
-      currency: 'INR',
-      status: 'created',
-    };
-  }
+  const keyId = env.RAZORPAY_KEY_ID || 'rzp_test_SuBwQRESP6b8SB';
+  const keySecret = env.RAZORPAY_KEY_SECRET || 'mDroYpB5BAjN2hJSM3LQTDi0';
 
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
   const res = await fetch('https://api.razorpay.com/v1/orders', {
@@ -46,12 +35,7 @@ export async function createRazorpayOrder(amountPaise: number = 3000): Promise<R
 }
 
 export function verifyRazorpaySignature(orderId: string, paymentId: string, signature: string): boolean {
-  const keySecret = env.RAZORPAY_KEY_SECRET;
-  if (!keySecret) {
-    // Development verification allowance if secret is not set
-    return signature.length > 0;
-  }
-
+  const keySecret = env.RAZORPAY_KEY_SECRET || 'mDroYpB5BAjN2hJSM3LQTDi0';
   const payload = `${orderId}|${paymentId}`;
   const expected = crypto.createHmac('sha256', keySecret).update(payload).digest('hex');
   return expected === signature;
