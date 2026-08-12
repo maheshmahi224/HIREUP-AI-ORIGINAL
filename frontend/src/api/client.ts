@@ -1,4 +1,4 @@
-const base = import.meta.env.VITE_API_URL ?? 'http://localhost:8787/api';
+export const apiBase = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '');
 
 let csrf = '';
 export const setCsrf = (token: string) => {
@@ -7,7 +7,7 @@ export const setCsrf = (token: string) => {
 export const getCsrf = () => csrf;
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${base}${path}`, {
+  const response = await fetch(`${apiBase}${path}`, {
     ...init,
     credentials: 'include',
     headers: {

@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { api, type PaymentOrderInfo, type Resume } from '../api/client.js';
+import { api, apiBase, type PaymentOrderInfo, type Resume } from '../api/client.js';
 import { Shell } from '../components/Shell.js';
 import { ResumeRenderer, TEMPLATES_META, defaultCustomization, type HireUpCustomization } from '../../../templates/index.js';
 
@@ -459,7 +459,7 @@ export function Editor() {
   const download = async () => {
     if (!draft) return;
     if (draft.paymentState === 'paid') {
-      window.open(`${import.meta.env.VITE_API_URL ?? 'http://localhost:8787/api'}/pdf/${id}/download?print=true`, '_blank');
+      window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
       return;
     }
     setPaying(true);
@@ -492,7 +492,7 @@ export function Editor() {
           });
           commit({ ...draft, paymentState: 'paid' });
           setPaying(false);
-          window.open(`${import.meta.env.VITE_API_URL ?? 'http://localhost:8787/api'}/pdf/${id}/download?print=true`, '_blank');
+          window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
         },
         modal: { ondismiss: () => setPaying(false) },
         theme: { color: '#FF2D55' },

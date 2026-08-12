@@ -72,20 +72,25 @@ NON-NEGOTIABLE RULES:
   "missingFields": [""]
 }`;
 
+const llmApiKey = () => env.LLM_API_KEY || env.OPENAI_API_KEY;
+const llmBaseUrl = () => (env.LLM_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '');
+const llmModel = () => env.LLM_MODEL || 'gpt-4o-mini';
+
 export async function extractResumeDataWithAI(rawInput: string): Promise<ExtractedResumeData> {
-  if (!env.OPENAI_API_KEY) {
+  const apiKey = llmApiKey();
+  if (!apiKey) {
     return heuristicFallbackExtraction(rawInput);
   }
 
   try {
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetch(`${llmBaseUrl()}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${env.OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: llmModel(),
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: rawInput },
@@ -97,7 +102,7 @@ export async function extractResumeDataWithAI(rawInput: string): Promise<Extract
 
     if (!res.ok) {
       const errText = await res.text();
-      console.error('OpenAI API Error:', errText);
+      console.error('LLM API Error:', errText);
       return heuristicFallbackExtraction(rawInput);
     }
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { api, setCsrf, type Session } from '../api/client.js';
+import { api, apiBase, setCsrf, type Session } from '../api/client.js';
 
 export function Auth({ signup = false }: { signup?: boolean }) {
   const nav = useNavigate();
@@ -57,7 +57,7 @@ export function Auth({ signup = false }: { signup?: boolean }) {
     }
   };
 
-  const googleUrl = `${import.meta.env.VITE_API_URL ?? 'http://localhost:8787/api'}/auth/google`;
+  const googleUrl = `${apiBase}/auth/google`;
 
   return (
     <div className="auth-page-container">
