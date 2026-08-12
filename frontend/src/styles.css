@@ -5247,15 +5247,78 @@ label {
   transform: translateX(-2px);
 }
 
+/* ==========================================================================
+   REBUILT EDITOR TOP BAR
+   ========================================================================== */
+.document-toolbar {
+  height: 60px;
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 20;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.document-toolbar::-webkit-scrollbar {
+  display: none;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.editor-back-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.editor-back-nav:hover {
+  background: #F3F4F6;
+  color: #111827;
+  border-color: #D1D5DB;
+}
+
+.back-arrow {
+  font-size: 14px;
+  transition: transform 0.15s ease;
+}
+
+.editor-back-nav:hover .back-arrow {
+  transform: translateX(-2px);
+}
+
 .toolbar-divider {
   width: 1px;
   height: 20px;
   background: #E5E7EB;
+  flex-shrink: 0;
 }
 
 .panel-toggle-btn {
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .undo-redo-group {
@@ -5264,36 +5327,42 @@ label {
   background: #F3F4F6;
   padding: 2px;
   border-radius: 8px;
+  flex-shrink: 0;
 }
 
 .toolbar-center {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   flex: 1;
-  max-width: 380px;
+  max-width: 320px;
   justify-content: center;
+  flex-shrink: 1;
+  min-width: 160px;
 }
 
 .title-edit-container {
   position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
-  max-width: 240px;
+  width: 100%;
+  max-width: 200px;
 }
 
 .title-edit-container .resume-title-input {
   width: 100%;
   height: 32px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: #111827;
   background: transparent;
   border: 1px solid transparent;
   border-radius: 6px;
-  padding: 0 24px 0 8px;
+  padding: 0 22px 0 6px;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .title-edit-container .resume-title-input:hover {
@@ -5319,9 +5388,10 @@ label {
 .save-status-pill {
   font-size: 11px;
   font-weight: 700;
-  padding: 3px 10px;
+  padding: 3px 8px;
   border-radius: 12px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .save-status-pill.saved {
@@ -5342,7 +5412,8 @@ label {
 .toolbar-actions {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .template-select-pill {
@@ -5354,6 +5425,7 @@ label {
   padding: 0 8px;
   border-radius: 8px;
   height: 34px;
+  flex-shrink: 0;
 }
 
 .template-select-pill select {
@@ -5373,6 +5445,7 @@ label {
   border-radius: 8px;
   padding: 2px;
   gap: 2px;
+  flex-shrink: 0;
 }
 
 .zoom-btn {
@@ -5413,6 +5486,7 @@ label {
   color: #6B7280;
   border-radius: 6px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .zoom-preset-btn:hover,
@@ -5433,6 +5507,8 @@ label {
   border: 1px solid #FFC2CE;
   border-radius: 8px;
   transition: all 0.15s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .ai-panel-trigger-btn:hover {
@@ -5441,12 +5517,12 @@ label {
 }
 
 .download-premium-btn {
-  height: 36px;
-  padding: 0 14px;
+  height: 38px;
+  padding: 0 16px;
   font-size: 13px;
   font-weight: 800;
   background: linear-gradient(135deg, #FF2D55 0%, #E00034 100%);
-  color: #FFFFFF;
+  color: #FFFFFF !important;
   border: none;
   border-radius: 10px;
   display: flex;
@@ -5454,6 +5530,9 @@ label {
   gap: 8px;
   box-shadow: 0 4px 12px rgba(255, 45, 85, 0.25);
   transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
 }
 
 .download-premium-btn:hover {
@@ -5470,6 +5549,447 @@ label {
 }
 
 
+/* ==========================================================================
+   REBUILT CONTENT EDITING PANEL (BRAND NEW CLEAN UI)
+   ========================================================================== */
+.editor-workspace {
+  background: #FAF7F2;
+}
+
+.workspace-panel {
+  background: #FAF7F2;
+  border-right: 1px solid #E5E7EB;
+}
+
+.workspace-panel-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 1. Profile Header Card */
+.profile-header-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.profile-avatar-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #FFF0F3;
+  border: 2px solid #FFC2CE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(255, 45, 85, 0.12);
+}
+
+.profile-avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-placeholder-icon {
+  font-size: 28px;
+}
+
+.photo-action-btn.primary {
+  background: #FF2D55;
+  color: #FFFFFF;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(255, 45, 85, 0.2);
+}
+
+.photo-action-btn.primary:hover {
+  background: #E00034;
+}
+
+/* 2. Section Accordion Cards */
+.editor-section {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.editor-section:hover {
+  border-color: #D1D5DB;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.section-heading {
+  width: 100%;
+  padding: 14px 16px;
+  background: #FFFFFF;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.section-heading:hover {
+  background: #FAFAFA;
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #FFF0F3;
+  color: #FF2D55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.section-title-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  flex: 1;
+}
+
+.section-count-badge {
+  font-size: 11px;
+  font-weight: 800;
+  background: #F3F4F6;
+  color: #4B5563;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.section-arrow {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #F9FAFB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  font-size: 10px;
+  color: #6B7280;
+  transition: transform 0.2s ease;
+}
+
+.section-heading[aria-expanded="true"] .section-arrow {
+  background: #FFF0F3;
+  color: #FF2D55;
+}
+
+.section-body {
+  padding: 14px 16px 18px;
+  background: #FFFFFF;
+  border-top: 1px solid #F3F4F6;
+}
+
+/* 3. Rebuilt Entry Items (Experience, Education, Projects) */
+.entry-card {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.entry-card:hover {
+  background: #FFFFFF;
+  border-color: #FFC2CE;
+  box-shadow: 0 2px 8px rgba(255, 45, 85, 0.08);
+}
+
+.entry-card-header {
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+}
+
+.drag-handle {
+  color: #9CA3AF;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  cursor: grab;
+  padding: 2px 4px;
+}
+
+.entry-title-summary {
+  flex: 1;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0;
+  min-width: 0;
+}
+
+.entry-title-summary strong {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-title-summary small {
+  font-size: 11px;
+  color: #6B7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.entry-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.editor-icon-button {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #4B5563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.editor-icon-button:hover {
+  background: #FF2D55;
+  color: #FFFFFF;
+  border-color: #FF2D55;
+}
+
+.editor-icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #F3F4F6;
+  color: #9CA3AF;
+  border-color: #E5E7EB;
+}
+
+.expand-chevron {
+  font-size: 10px;
+  color: #6B7280;
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.entry-editor-body {
+  padding: 14px;
+  background: #FFFFFF;
+  border-top: 1px solid #F3F4F6;
+}
+
+.entry-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.entry-fields .field-full {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field span {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6B7280;
+}
+
+.field input, .field textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #111827;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.field input:focus, .field textarea:focus {
+  background: #FFFFFF;
+  border-color: #FF2D55;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 45, 85, 0.1);
+}
+
+.add-entry-row-btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #FF2D55;
+  background: #FFF0F3;
+  border: 1px dashed #FFC2CE;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-top: 8px;
+}
+
+.add-entry-row-btn:hover {
+  background: #FF2D55;
+  color: #FFFFFF;
+  border-style: solid;
+}
+
+/* 4. Add Content Floating Button */
+.add-content-container {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.add-content-main-btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #FFFFFF;
+  background: linear-gradient(135deg, #FF2D55 0%, #E00034 100%);
+  border: none;
+  border-radius: 99px;
+  box-shadow: 0 6px 20px rgba(255, 45, 85, 0.35);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-content-main-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 45, 85, 0.45);
+}
 
 
+/* ==========================================================================
+   PRINT MEDIA STYLES — for window.print() PDF Export
+   Only shows the resume canvas, hides all editor chrome
+   ========================================================================== */
+@media print {
+  /* Hide everything except the resume preview */
+  body > *:not(#root) {
+    display: none !important;
+  }
 
+  /* Hide all editor chrome */
+  .document-toolbar,
+  .workspace-panel,
+  .editor-workspace-tabs,
+  .mobile-editor-tabs,
+  .editor-workspace > aside,
+  .editor-workspace > div:not(.preview-panel),
+  .nav,
+  .sidebar,
+  .ai-panel,
+  .payment-notice-overlay,
+  .editor-loading-screen,
+  .transition-popup,
+  .modal-overlay,
+  header,
+  footer {
+    display: none !important;
+  }
+
+  /* Make the preview area fill the page */
+  .preview-panel,
+  .resume-preview-workspace,
+  .preview-area,
+  .resume-canvas-wrapper,
+  .canvas-scroll-area {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    position: static !important;
+  }
+
+  /* Reset scaling slot */
+  .resume-paper-slot {
+    width: 100% !important;
+    height: auto !important;
+    transform: none !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    background: #ffffff !important;
+  }
+
+  /* Make the resume paper fill and print cleanly */
+  .resume-paper,
+  .resume-canvas,
+  [class*="resume-template"],
+  [class*="template-container"] {
+    width: 210mm !important;
+    min-height: 297mm !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    page-break-inside: avoid;
+    background: #ffffff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, body {
+    height: auto;
+    width: 210mm;
+    margin: 0 auto;
+    background: #ffffff;
+  }
+}

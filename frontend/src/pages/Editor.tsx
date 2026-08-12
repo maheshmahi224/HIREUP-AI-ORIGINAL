@@ -476,7 +476,7 @@ export function Editor() {
   const download = async () => {
     if (!draft) return;
     if (draft.paymentState === 'paid') {
-      window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
+      window.print();
       return;
     }
     setPaying(true);
@@ -486,7 +486,7 @@ export function Editor() {
       if (order.alreadyPaid) {
         commit({ ...draft, paymentState: 'paid' });
         setPaying(false);
-        window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
+        window.print();
         return;
       }
 
@@ -501,9 +501,9 @@ export function Editor() {
         setPaymentNotice({
           type: 'success',
           title: 'Payment Complete! 🎉',
-          message: 'Download unlocked. Opening your PDF...',
+          message: 'Download unlocked! Opening PDF save window...',
         });
-        window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
+        window.print();
         return;
       }
 
@@ -541,7 +541,7 @@ export function Editor() {
               title: 'Payment Successful! 🎉',
               message: 'Your resume download has been unlocked.',
             });
-            window.open(`${apiBase}/pdf/${id}/download?print=true`, '_blank');
+            window.print();
           } catch {
             setPaying(false);
             setPaymentNotice({
