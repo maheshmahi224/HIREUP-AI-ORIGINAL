@@ -4,6 +4,7 @@ import type { Request, Response } from 'express';
 import { database } from '../db/mongo.js';
 import { env } from '../config/env.js';
 import { ObjectId } from 'mongodb';
+import { verifyAndCreateEntitlement } from '../services/entitlement.js';
 
 const router = Router();
 
@@ -79,36 +80,22 @@ router.post(
 
           if (paymentOrder) {
             const resumeId = paymentOrder.resumeId as ObjectId;
+            const userId = paymentOrder.userId as ObjectId;
+            const contentHash = paymentOrder.contentHash;
 
-            // Update resume payment state
-            await db.collection('resumes').updateOne(
-              { _id: resumeId },
-              { $set: { paymentState: 'paid', updatedAt: now } }
-            );
+            if (contentHash) {
+              await verifyAndCreateEntitlement({
+                userId,
+                resumeId,
+                contentHash,
+                amount: paymentOrder.amount || 3000,
+                currency: paymentOrder.currency || 'INR',
+                razorpayOrderId: orderId,
+                razorpayPaymentId: paymentId || orderId,
+              });
+            }
 
-            // Log the payment
-            await db.collection('payments').updateOne(
-              { orderId },
-              {
-                $set: {
-                  paymentId,
-                  status: 'captured',
-                  capturedAt: now,
-                  updatedAt: now,
-                },
-                $setOnInsert: {
-                  userId: paymentOrder.userId,
-                  resumeId,
-                  orderId,
-                  amount: paymentOrder.amount,
-                  currency: paymentOrder.currency,
-                  createdAt: now,
-                },
-              },
-              { upsert: true }
-            );
-
-            console.log(`[webhook] payment.captured: orderId=${orderId} resumeId=${resumeId}`);
+            console.log(`[webhook] payment.captured: orderId=${orderId} resumeId=${resumeId} contentHash=${contentHash}`);
           }
         } catch (err) {
           console.error('[webhook] DB error:', err);

@@ -430,14 +430,47 @@ export function Editor() {
     }
   };
 
+  // Check server-side content fingerprint entitlement status
+  const entitlementQuery = useQuery({
+    queryKey: ['entitlement', id, draft?.templateId, draft?.content],
+    queryFn: async () => {
+      if (!draft) return { isCurrentStatePaid: false };
+      try {
+        return await api<{ isCurrentStatePaid: boolean; contentHash: string }>('/payments/check-entitlement', {
+          method: 'POST',
+          body: JSON.stringify({ resumeId: id }),
+        });
+      } catch {
+        return { isCurrentStatePaid: false };
+      }
+    },
+    enabled: Boolean(draft),
+  });
+
+  const isCurrentStatePaid = Boolean(entitlementQuery.data?.isCurrentStatePaid);
+
   const download = async () => {
     if (!draft) return;
-    if (draft.paymentState === 'paid') {
-      await exportPdf();
-      return;
-    }
     setPaying(true);
     setPaymentNotice(null);
+
+    // 1. First attempt server-side download authorization
+    try {
+      const authRes = await api<{ authorized: boolean; contentHash: string }>('/payments/authorize-download', {
+        method: 'POST',
+        body: JSON.stringify({ resumeId: id }),
+      });
+
+      if (authRes.authorized) {
+        setPaying(false);
+        await exportPdf();
+        return;
+      }
+    } catch (err: any) {
+      // If payment required or unauthorized, fall through to Razorpay checkout
+    }
+
+    // 2. Trigger Razorpay checkout for ₹30 if unpaid content state
     try {
       const order = await api<PaymentOrderInfo>('/payments/create-order', {
         method: 'POST',
@@ -445,8 +478,8 @@ export function Editor() {
       });
 
       if (order.alreadyPaid) {
-        commit({ ...draft, paymentState: 'paid' });
         setPaying(false);
+        queryClient.invalidateQueries({ queryKey: ['entitlement', id] });
         await exportPdf();
         return;
       }
@@ -465,7 +498,7 @@ export function Editor() {
         amount: order.amount,
         currency: order.currency,
         name: 'HireUp AI',
-        description: 'Resume Premium Export Fee',
+        description: 'Resume Download Entitlement (₹30)',
         order_id: order.orderId,
         handler: async (response: any) => {
           try {
@@ -478,12 +511,12 @@ export function Editor() {
                 signature: response.razorpay_signature,
               }),
             });
-            commit({ ...draft, paymentState: 'paid' });
             setPaying(false);
+            queryClient.invalidateQueries({ queryKey: ['entitlement', id] });
             setPaymentNotice({
               type: 'success',
               title: 'Payment Successful! 🎉',
-              message: 'Your resume download has been unlocked.',
+              message: 'Your resume download entitlement for this exact content state has been unlocked.',
             });
             await exportPdf();
           } catch {
@@ -1039,6 +1072,16 @@ export function Editor() {
               onChange={(e) => update((r) => ({ ...r, title: e.target.value }))}
             />
             <span className="v2-save-status">{saveState === 'saving' ? '⏳ Saving...' : '✓ Saved'}</span>
+            {!isCurrentStatePaid && (
+              <span className="v2-unpaid-notice-badge" title="Changes to resume text or design require a new ₹30 entitlement">
+                Changes require new ₹30 download
+              </span>
+            )}
+            {isCurrentStatePaid && (
+              <span className="v2-paid-notice-badge">
+                Paid State Unlocked ✓
+              </span>
+            )}
           </div>
 
           <div className="v2-toolbar-right">
@@ -1061,7 +1104,11 @@ export function Editor() {
 
             <button type="button" className="v2-ai-trigger-btn" onClick={() => selectWorkspace('ai')}>⚡ AI Assistant</button>
             <button type="button" className="v2-download-btn" onClick={download} disabled={paying}>
-              Download PDF 📥 <span className="v2-price-tag">₹30</span>
+              {isCurrentStatePaid ? (
+                <>Download PDF 📥</>
+              ) : (
+                <>Download PDF 📥 <span className="v2-price-tag">₹30</span></>
+              )}
             </button>
           </div>
         </header>
