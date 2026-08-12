@@ -9,6 +9,7 @@ import authRoutes from './routes/auth.routes.js';
 import profileRoutes from './routes/profile.routes.js';
 import resumeRoutes from './routes/resume.routes.js';
 import aiRoutes from './routes/ai.routes.js';
+import aiToolsRoutes from './routes/ai-tools.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
 import pdfRoutes from './routes/pdf.routes.js';
@@ -45,6 +46,7 @@ app.use('/api/auth', rateLimit({ windowMs: 15 * 60000, limit: 30, standardHeader
 app.use('/api/profile', profileRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/ai-tools', aiToolsRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/pdf', pdfRoutes);
 app.use('/api/admin', adminRoutes);

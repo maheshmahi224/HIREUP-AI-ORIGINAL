@@ -307,10 +307,19 @@ export function Editor() {
   const [paymentNotice, setPaymentNotice] = useState<{ type: 'success' | 'error'; title: string; message: string } | null>(null);
   const [zoomMode, setZoomMode] = usePersistentState<ZoomMode>('hireup.editor.zoomMode', 'fit');
   const [zoom, setZoom] = usePersistentState('hireup.editor.zoom', 0.7);
-  const [activeAiTool, setActiveAiTool] = useState('AI Resume Builder');
-  const [aiNotes, setAiNotes] = useState('');
-  const [aiOutput, setAiOutput] = useState('');
+  // AI Tools state
+  type AiToolKey = 'summary' | 'grammar' | 'translate' | 'cover-letter';
+  const [aiTool, setAiTool] = useState<AiToolKey>('summary');
   const [aiRunning, setAiRunning] = useState(false);
+  const [aiResult, setAiResult] = useState<any>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  // Tool-specific inputs
+  const [aiJobTitle, setAiJobTitle] = useState('');
+  const [aiCompany, setAiCompany] = useState('');
+  const [aiJobDesc, setAiJobDesc] = useState('');
+  const [aiGrammarText, setAiGrammarText] = useState('');
+  const [aiTargetLang, setAiTargetLang] = useState('French');
+  const [aiCoverTone, setAiCoverTone] = useState<'professional'|'enthusiastic'|'concise'>('professional');
   const [editingProfile, setEditingProfile] = useState(false);
 
   const history = useRef<Resume[]>([]);
@@ -601,60 +610,6 @@ export function Editor() {
     }
   };
 
-  const runAiTool = async () => {
-    setAiRunning(true);
-    setAiOutput('');
-    try {
-      if (activeAiTool === 'AI Resume Builder') {
-        if (aiNotes.trim().length < 10) {
-          setAiOutput('Paste at least 10 characters of raw career notes to extract structured resume data.');
-          return;
-        }
-        const response = await api<{ extracted: Data }>('/ai/extract', { method: 'POST', body: JSON.stringify({ rawInput: aiNotes }) });
-        updateContent((content) => ({
-          ...content,
-          personal: { ...(content.personal || {}), ...(response.extracted.personal || {}) },
-          summary: response.extracted.summary || content.summary || '',
-          education: response.extracted.education?.length ? response.extracted.education : content.education || [],
-          experience: response.extracted.experience?.length ? response.extracted.experience : content.experience || [],
-          projects: response.extracted.projects?.length ? response.extracted.projects : content.projects || [],
-          skills: response.extracted.skills?.length ? response.extracted.skills : content.skills || [],
-          certifications: response.extracted.certifications?.length ? response.extracted.certifications : content.certifications || [],
-          awards: response.extracted.awards?.length ? response.extracted.awards : content.awards || [],
-          languages: response.extracted.languages?.length ? response.extracted.languages : content.languages || [],
-        }));
-        setAiOutput('Structured profile extracted and applied. Review highlighted sections in Content.');
-        setWorkspace('content');
-        return;
-      }
-
-      if (activeAiTool === 'Generate Summary') {
-        const next = buildSummary(data);
-        updateContent((content) => ({ ...content, summary: next }));
-        setAiOutput(next);
-        setWorkspace('content');
-        return;
-      }
-
-      if (activeAiTool === 'Find Missing Information') {
-        const missing = findMissingDetails(data);
-        setAiOutput(missing.length ? missing.join('\n') : 'No critical missing information found. Review dates, metrics, and links for polish.');
-        return;
-      }
-
-      if (activeAiTool === 'ATS Analysis') {
-        const missing = findMissingDetails(data);
-        const skills = asTextList(data.skills).length;
-        setRightPanel('ats');
-        setAiOutput(`ATS readiness: ${completion}%\nSkills listed: ${skills}\nOpen checks: ${missing.length ? missing.join(' ') : 'No critical gaps found.'}`);
-        return;
-      }
-    } catch (error) {
-      setAiOutput(error instanceof Error ? error.message : 'AI action failed. Try again.');
-    } finally {
-      setAiRunning(false);
-    }
-  };
 
   if (!draft) {
     return (
@@ -1464,24 +1419,314 @@ export function Editor() {
     </div>
   );
 
-  const aiTools = ['AI Resume Builder', 'Improve Writing', 'Rewrite Bullet', 'ATS Analysis', 'Find Missing Information', 'Generate Summary'];
+  const runAiAction = async (endpoint: string, body: Record<string, unknown>) => {
+    setAiRunning(true);
+    setAiResult(null);
+    setAiError(null);
+    try {
+      const result = await api<any>(`/ai-tools/${endpoint}`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      });
+      setAiResult({ tool: endpoint, data: result });
+    } catch (err: any) {
+      setAiError(err?.message || 'AI request failed. Please try again.');
+    } finally {
+      setAiRunning(false);
+    }
+  };
+
+  const applyGeneratedSummary = () => {
+    if (aiResult?.data?.summary) {
+      updateContent((c) => ({ ...c, summary: aiResult.data.summary }));
+      setAiResult(null);
+    }
+  };
+
+  const applyTranslation = () => {
+    if (aiResult?.data?.translatedResume) {
+      commit({ ...draft!, content: aiResult.data.translatedResume });
+      setAiResult(null);
+    }
+  };
+
+  const aiToolsMeta = [
+    { key: 'summary' as const, icon: '📝', label: 'Generate Summary', badge: '', desc: 'Turn your resume content into a professional summary.' },
+    { key: 'grammar' as const, icon: 'AB', label: 'Check Spelling & Grammar', badge: '', desc: 'Scan for spelling and grammar issues with AI suggestions.' },
+    { key: 'translate' as const, icon: '🌐', label: 'Translate Resume', badge: '', desc: 'Create a translated version of your resume.' },
+    { key: 'cover-letter' as const, icon: '📄', label: 'Draft Cover Letter', badge: 'Beta', desc: 'Draft a tailored cover letter based on your resume and target job.' },
+  ];
+
   const renderAi = () => (
     <div className="workspace-panel-body">
-      <div className="ai-tool-list">
-        {aiTools.map((tool) => (
-          <button
-            type="button"
-            key={tool}
-            className={activeAiTool === tool ? 'active' : ''}
-            onClick={() => {
-              setActiveAiTool(tool);
-              setRightPanel('ai');
-            }}
+      <div className="ai-intro-header">
+        <span className="ai-intro-icon">⚡</span>
+        <div>
+          <h3>AI Tools</h3>
+          <p>Powered by Groq · Llama 3.3 70B</p>
+        </div>
+      </div>
+
+      {/* Tool Cards */}
+      <div className="ai-tool-cards">
+        {aiToolsMeta.map((tool) => (
+          <div
+            key={tool.key}
+            className={`ai-tool-card ${aiTool === tool.key ? 'active' : ''}`}
+            onClick={() => { setAiTool(tool.key); setAiResult(null); setAiError(null); }}
           >
-            <span>{tool}</span>
-            <small>Open beside preview</small>
-          </button>
+            <div className="ai-tool-card-left">
+              <span className="ai-tool-icon">{tool.icon}</span>
+              <div>
+                <span className="ai-tool-label">
+                  {tool.label}
+                  {tool.badge && <span className="ai-badge">{tool.badge}</span>}
+                </span>
+                <small className="ai-tool-desc">{tool.desc}</small>
+              </div>
+            </div>
+            <button
+              type="button"
+              className="ai-action-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setAiTool(tool.key);
+                setAiResult(null);
+                setAiError(null);
+              }}
+            >
+              {aiTool === tool.key ? 'Selected ✓' : 'Select'}
+            </button>
+          </div>
         ))}
+      </div>
+
+      {/* Active Tool Configuration */}
+      <div className="ai-tool-config">
+        {aiTool === 'summary' && (
+          <div className="ai-config-section">
+            <label className="ai-field">
+              <span>Target Job Title <small>(optional)</small></span>
+              <input
+                value={aiJobTitle}
+                onChange={(e) => setAiJobTitle(e.target.value)}
+                placeholder="e.g. Full Stack Developer, ML Engineer..."
+              />
+            </label>
+            <button
+              type="button"
+              className="ai-run-btn"
+              disabled={aiRunning}
+              onClick={() => runAiAction('generate-summary', { resumeData: data, jobTitle: aiJobTitle })}
+            >
+              {aiRunning ? <><span className="ai-spinner" />Generating...</> : '📝 Generate Summary'}
+            </button>
+          </div>
+        )}
+
+        {aiTool === 'grammar' && (
+          <div className="ai-config-section">
+            <label className="ai-field">
+              <span>Text to Check</span>
+              <textarea
+                rows={5}
+                value={aiGrammarText}
+                onChange={(e) => setAiGrammarText(e.target.value)}
+                placeholder="Paste any text from your resume to check spelling, grammar, and style..."
+              />
+            </label>
+            <button
+              type="button"
+              className="ai-run-btn"
+              disabled={aiRunning || aiGrammarText.trim().length < 10}
+              onClick={() => runAiAction('check-grammar', { text: aiGrammarText, section: 'resume' })}
+            >
+              {aiRunning ? <><span className="ai-spinner" />Checking...</> : 'AB Check Now'}
+            </button>
+          </div>
+        )}
+
+        {aiTool === 'translate' && (
+          <div className="ai-config-section">
+            <label className="ai-field">
+              <span>Target Language</span>
+              <select value={aiTargetLang} onChange={(e) => setAiTargetLang(e.target.value)}>
+                {['French', 'Spanish', 'German', 'Italian', 'Portuguese', 'Japanese', 'Korean', 'Arabic', 'Hindi', 'Dutch', 'Russian'].map(lang => (
+                  <option key={lang} value={lang}>{lang}</option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              className="ai-run-btn"
+              disabled={aiRunning}
+              onClick={() => runAiAction('translate', { resumeData: data, targetLanguage: aiTargetLang })}
+            >
+              {aiRunning ? <><span className="ai-spinner" />Translating...</> : `🌐 Translate to ${aiTargetLang}`}
+            </button>
+          </div>
+        )}
+
+        {aiTool === 'cover-letter' && (
+          <div className="ai-config-section">
+            <label className="ai-field">
+              <span>Job Title <span className="ai-required">*</span></span>
+              <input
+                value={aiJobTitle}
+                onChange={(e) => setAiJobTitle(e.target.value)}
+                placeholder="e.g. Software Engineer, Data Analyst..."
+              />
+            </label>
+            <label className="ai-field">
+              <span>Company Name <span className="ai-required">*</span></span>
+              <input
+                value={aiCompany}
+                onChange={(e) => setAiCompany(e.target.value)}
+                placeholder="e.g. Google, TCS, Infosys..."
+              />
+            </label>
+            <label className="ai-field">
+              <span>Job Description <small>(optional but recommended)</small></span>
+              <textarea
+                rows={4}
+                value={aiJobDesc}
+                onChange={(e) => setAiJobDesc(e.target.value)}
+                placeholder="Paste the job description here for a more tailored cover letter..."
+              />
+            </label>
+            <label className="ai-field">
+              <span>Tone</span>
+              <div className="ai-tone-select">
+                {(['professional', 'enthusiastic', 'concise'] as const).map((t) => (
+                  <button
+                    key={t}
+                    type="button"
+                    className={aiCoverTone === t ? 'active' : ''}
+                    onClick={() => setAiCoverTone(t)}
+                  >
+                    {t.charAt(0).toUpperCase() + t.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </label>
+            <button
+              type="button"
+              className="ai-run-btn"
+              disabled={aiRunning || !aiJobTitle.trim() || !aiCompany.trim()}
+              onClick={() => runAiAction('cover-letter', {
+                resumeData: data,
+                jobTitle: aiJobTitle,
+                companyName: aiCompany,
+                jobDescription: aiJobDesc,
+                tone: aiCoverTone,
+              })}
+            >
+              {aiRunning ? <><span className="ai-spinner" />Drafting...</> : '📄 Draft Cover Letter'}
+            </button>
+          </div>
+        )}
+
+        {/* Error */}
+        {aiError && (
+          <div className="ai-error-box">
+            <span>⚠️ {aiError}</span>
+          </div>
+        )}
+
+        {/* Results */}
+        {aiResult && aiResult.tool === 'generate-summary' && (
+          <div className="ai-result-box">
+            <div className="ai-result-header">
+              <span>✨ Generated Summary</span>
+            </div>
+            <p className="ai-result-text">{aiResult.data.summary}</p>
+            <div className="ai-result-actions">
+              <button type="button" className="ai-apply-btn" onClick={applyGeneratedSummary}>
+                ✓ Apply to Resume
+              </button>
+              <button type="button" className="ai-dismiss-btn" onClick={() => setAiResult(null)}>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
+        {aiResult && aiResult.tool === 'check-grammar' && (
+          <div className="ai-result-box">
+            <div className="ai-result-header">
+              <span>Grammar Report — Score: <strong>{aiResult.data.score}/100</strong></span>
+            </div>
+            {aiResult.data.issues?.length > 0 ? (
+              <div className="ai-grammar-issues">
+                {aiResult.data.issues.map((issue: any, i: number) => (
+                  <div key={i} className={`ai-issue ai-issue-${issue.severity}`}>
+                    <span className="ai-issue-type">{issue.type}</span>
+                    <p><s>{issue.original}</s> → <strong>{issue.suggestion}</strong></p>
+                    <small>{issue.explanation}</small>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="ai-result-text">✅ No issues found! Your text looks great.</p>
+            )}
+            {aiResult.data.corrected && (
+              <div className="ai-corrected-block">
+                <label>Corrected Version:</label>
+                <p>{aiResult.data.corrected}</p>
+              </div>
+            )}
+            {aiResult.data.tips?.map((tip: string, i: number) => (
+              <p key={i} className="ai-tip">💡 {tip}</p>
+            ))}
+            <button type="button" className="ai-dismiss-btn" onClick={() => setAiResult(null)}>Dismiss</button>
+          </div>
+        )}
+
+        {aiResult && aiResult.tool === 'translate' && (
+          <div className="ai-result-box">
+            <div className="ai-result-header">
+              <span>🌐 Translated to {aiResult.data.targetLanguage}</span>
+            </div>
+            <p className="ai-result-text">Resume content has been translated. Preview first, then apply to your resume.</p>
+            <div className="ai-result-actions">
+              <button type="button" className="ai-apply-btn" onClick={applyTranslation}>
+                ✓ Apply Translation
+              </button>
+              <button type="button" className="ai-dismiss-btn" onClick={() => setAiResult(null)}>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
+        {aiResult && aiResult.tool === 'cover-letter' && (
+          <div className="ai-result-box">
+            <div className="ai-result-header">
+              <span>📄 Cover Letter Draft</span>
+            </div>
+            <pre className="ai-cover-letter-text">{aiResult.data.coverLetter}</pre>
+            <div className="ai-result-actions">
+              <button
+                type="button"
+                className="ai-apply-btn"
+                onClick={() => {
+                  const el = document.createElement('textarea');
+                  el.value = aiResult.data.coverLetter;
+                  document.body.appendChild(el);
+                  el.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(el);
+                  alert('Cover letter copied to clipboard!');
+                }}
+              >
+                📋 Copy to Clipboard
+              </button>
+              <button type="button" className="ai-dismiss-btn" onClick={() => setAiResult(null)}>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1498,41 +1743,12 @@ export function Editor() {
     return (
       <aside className="right-context-panel" aria-label={`${rightPanel} panel`}>
         <div className="context-header">
-          <strong>{rightPanel === 'ai' ? activeAiTool : rightPanel === 'ats' ? 'ATS Feedback' : 'Document Settings'}</strong>
+          <strong>{rightPanel === 'ats' ? 'ATS Feedback' : 'Document Settings'}</strong>
           <IconButton label="Close right panel" onClick={() => setRightPanel(null)}>
             ✕
           </IconButton>
         </div>
         <div className="context-body">
-          {rightPanel === 'ai' && (
-            <>
-              <div className="context-tool-picker">
-                {aiTools.map((tool) => (
-                  <button type="button" key={tool} className={activeAiTool === tool ? 'active' : ''} onClick={() => setActiveAiTool(tool)}>
-                    {tool}
-                  </button>
-                ))}
-              </div>
-              <label className="field">
-                <span>Working Notes</span>
-                <textarea
-                  rows={8}
-                  value={aiNotes}
-                  onChange={(event) => setAiNotes(event.target.value)}
-                  placeholder="Paste career notes or bullets here..."
-                />
-              </label>
-              <button type="button" className="button" onClick={runAiTool} disabled={aiRunning}>
-                {aiRunning ? 'Running...' : `Run ${activeAiTool}`}
-              </button>
-              {aiOutput && (
-                <div className="ai-output">
-                  <span>Result</span>
-                  <pre>{aiOutput}</pre>
-                </div>
-              )}
-            </>
-          )}
           {rightPanel === 'ats' && (
             <div className="ats-list">
               <b>{completion}% Complete</b>

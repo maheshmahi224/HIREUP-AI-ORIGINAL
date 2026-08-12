@@ -6004,3 +6004,464 @@ label {
     background: #ffffff;
   }
 }
+
+
+/* ==========================================================================
+   AI TOOLS PANEL — Groq-powered, 4 tools
+   ========================================================================== */
+
+/* Header */
+.ai-intro-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fff5f7 0%, #fff0f3 100%);
+  border: 1px solid #FFC2CE;
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+
+.ai-intro-icon {
+  font-size: 28px;
+  width: 48px;
+  height: 48px;
+  background: #FF2D55;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ai-intro-header h3 {
+  margin: 0 0 2px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.ai-intro-header p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #6B7280;
+}
+
+/* Tool Cards */
+.ai-tool-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.ai-tool-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-tool-card:hover {
+  border-color: #FFC2CE;
+  background: #FFF9FA;
+  box-shadow: 0 2px 8px rgba(255, 45, 85, 0.06);
+}
+
+.ai-tool-card.active {
+  border-color: #FF2D55;
+  background: #FFF5F7;
+  box-shadow: 0 2px 10px rgba(255, 45, 85, 0.12);
+}
+
+.ai-tool-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-tool-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #FFF0F3;
+  border: 1px solid #FFD6E0;
+  color: #FF2D55;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.ai-tool-card.active .ai-tool-icon {
+  background: #FF2D55;
+  color: #FFFFFF;
+  border-color: #FF2D55;
+}
+
+.ai-tool-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.ai-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 99px;
+  background: #FF2D55;
+  color: #FFFFFF;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ai-tool-desc {
+  display: block;
+  font-size: 11px;
+  color: #6B7280;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-action-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #374151;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.ai-tool-card.active .ai-action-btn {
+  background: #FF2D55;
+  color: #FFFFFF;
+  border-color: #FF2D55;
+}
+
+/* Config Section */
+.ai-tool-config {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-config-section {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ai-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ai-field > span {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6B7280;
+}
+
+.ai-field > span small {
+  text-transform: none;
+  font-weight: 500;
+  color: #9CA3AF;
+  letter-spacing: 0;
+  margin-left: 4px;
+}
+
+.ai-field input,
+.ai-field select,
+.ai-field textarea {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #111827;
+  background: #F9FAFB;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.ai-field input:focus,
+.ai-field select:focus,
+.ai-field textarea:focus {
+  background: #FFFFFF;
+  border-color: #FF2D55;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 45, 85, 0.08);
+}
+
+.ai-required {
+  color: #FF2D55;
+}
+
+.ai-tone-select {
+  display: flex;
+  gap: 6px;
+}
+
+.ai-tone-select button {
+  flex: 1;
+  padding: 7px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 8px;
+  background: #F9FAFB;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-tone-select button.active {
+  background: #FF2D55;
+  color: #FFFFFF;
+  border-color: #FF2D55;
+}
+
+/* Run Button */
+.ai-run-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #FF2D55 0%, #E00034 100%);
+  color: #FFFFFF;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(255, 45, 85, 0.25);
+}
+
+.ai-run-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(255, 45, 85, 0.35);
+}
+
+.ai-run-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Spinner */
+.ai-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #FFFFFF;
+  border-radius: 50%;
+  animation: ai-spin 0.6s linear infinite;
+}
+
+@keyframes ai-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error Box */
+.ai-error-box {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #DC2626;
+  font-weight: 600;
+}
+
+/* Result Box */
+.ai-result-box {
+  background: #FFFFFF;
+  border: 1.5px solid #E5E7EB;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.ai-result-header {
+  padding: 12px 14px;
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ai-result-text {
+  padding: 14px;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.ai-result-actions {
+  padding: 12px 14px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.ai-apply-btn {
+  flex: 1;
+  padding: 9px;
+  font-size: 13px;
+  font-weight: 700;
+  background: #FF2D55;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-apply-btn:hover {
+  background: #E00034;
+}
+
+.ai-dismiss-btn {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #F3F4F6;
+  color: #374151;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.ai-dismiss-btn:hover {
+  background: #E5E7EB;
+}
+
+/* Grammar Issues */
+.ai-grammar-issues {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ai-issue {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border-left: 3px solid;
+}
+
+.ai-issue-error {
+  background: #FEF2F2;
+  border-color: #DC2626;
+}
+
+.ai-issue-warning {
+  background: #FFFBEB;
+  border-color: #D97706;
+}
+
+.ai-issue-suggestion {
+  background: #F0FDF4;
+  border-color: #059669;
+}
+
+.ai-issue-type {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+
+.ai-issue p {
+  margin: 4px 0;
+  font-size: 12px;
+  color: #374151;
+}
+
+.ai-issue small {
+  font-size: 11px;
+  color: #6B7280;
+}
+
+.ai-corrected-block {
+  padding: 10px 14px;
+  border-top: 1px solid #F3F4F6;
+}
+
+.ai-corrected-block label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ai-corrected-block p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.55;
+}
+
+.ai-tip {
+  padding: 6px 14px;
+  font-size: 12px;
+  color: #6B7280;
+  margin: 0;
+  border-top: 1px solid #F3F4F6;
+}
+
+/* Cover Letter Output */
+.ai-cover-letter-text {
+  padding: 14px;
+  font-size: 12.5px;
+  font-family: inherit;
+  color: #374151;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
