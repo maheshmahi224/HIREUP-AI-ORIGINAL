@@ -24,11 +24,32 @@ const { rateLimit } = require('express-rate-limit') as {
 
 export const app = express();
 
+// Always include known production origins as hard fallbacks
+// so CORS works even if Vercel env vars are misconfigured
+const ALLOWED_ORIGINS: string[] = [
+  'https://hireup-ai-original-frontend.vercel.app',
+  'https://hireup-ai-original-admin.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:4173',
+];
+if (env.FRONTEND_ORIGIN && !ALLOWED_ORIGINS.includes(env.FRONTEND_ORIGIN)) {
+  ALLOWED_ORIGINS.push(env.FRONTEND_ORIGIN);
+}
+if (env.ADMIN_ORIGIN && !ALLOWED_ORIGINS.includes(env.ADMIN_ORIGIN)) {
+  ALLOWED_ORIGINS.push(env.ADMIN_ORIGIN);
+}
+
 app.set('trust proxy', 1);
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(
   cors({
-    origin: [env.FRONTEND_ORIGIN, env.ADMIN_ORIGIN].filter(Boolean) as string[],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    },
     credentials: true,
   })
 );
