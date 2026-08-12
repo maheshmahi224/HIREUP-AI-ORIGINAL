@@ -126,8 +126,8 @@ export function Support() {
         {/* Support Header */}
         <div className="v2-support-header">
           <div className="v2-support-badge">24/7 AI Support & Admin Escalation</div>
-          <h1>HireUp AI Support Center</h1>
-          <p>Get instant answers about orders, payments, and PDF exports, or talk directly with our team.</p>
+          <h1>HireUp Support & Help Center</h1>
+          <p>Get instant answers about orders, payments, and PDF exports, or email us directly at <strong>support.hireupai@gmail.com</strong>.</p>
         </div>
 
         {/* Tab Navigation */}

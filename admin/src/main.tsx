@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-query';
 import './styles.css';
 
 const base = import.meta.env.VITE_API_URL ?? 'http://localhost:8787/api';
@@ -97,28 +97,87 @@ function Layout({ children }: { children: React.ReactNode }) {
 
 function Login() {
   const nav = useNavigate();
+  const queryClient = useQueryClient();
+  const [email, setEmail] = useState('maheshmahi.ai224@gmail.com');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      const res = await api<{ user: { id: string; name: string; email: string; role: string }; csrfToken?: string }>('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+
+      if (res.user.role !== 'admin') {
+        setError('Access denied: This account does not have administrator privileges.');
+        setLoading(false);
+        return;
+      }
+
+      if (res.csrfToken) csrf = res.csrfToken;
+      await queryClient.invalidateQueries({ queryKey: ['session'] });
+      nav('/');
+    } catch (err: any) {
+      setError(err?.message || 'Login failed. Invalid email or password.');
+      setLoading(false);
+    }
+  };
+
   return (
     <main className="login">
-      <div>
-        <Link className="brand" to="/" style={{ marginBottom: '16px' }}>
+      <div style={{ maxWidth: '400px', width: '100%' }}>
+        <Link className="brand" to="/" style={{ marginBottom: '16px', display: 'inline-block' }}>
           hireup<span>ai</span>
           <small>ADMIN</small>
         </Link>
         <p className="eyebrow">RESTRICTED AREA</p>
-        <h1>Admin Sign In</h1>
-        <p style={{ color: 'var(--color-text-secondary)', margin: '8px 0 24px' }}>
-          Use an administrator account. Authorization is verified by the backend API.
+        <h1 style={{ marginBottom: '8px' }}>Admin Sign In</h1>
+        <p style={{ color: 'var(--color-text-secondary)', margin: '0 0 20px', fontSize: '13px' }}>
+          Sign in with your administrator credentials.
         </p>
 
-        <a className="button" style={{ width: '100%', textDecoration: 'none' }} href={`${base}/auth/google`}>
-          Continue with Google Admin Auth
-        </a>
-        <button
-          style={{ display: 'block', margin: '16px auto 0', background: 'none', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer' }}
-          onClick={() => nav('/')}
-        >
-          Return to login
-        </button>
+        {error && <div className="alert alert-danger" style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', padding: '10px 14px', borderRadius: '8px', fontSize: '12.5px', marginBottom: '16px', fontWeight: 600 }}>⚠️ {error}</div>}
+
+        <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>Admin Email</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="admin@example.com"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #D1D5DB', fontSize: '14px' }}
+            />
+          </div>
+
+          <div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+              style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid #D1D5DB', fontSize: '14px' }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="button"
+            style={{ width: '100%', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginTop: '6px' }}
+          >
+            {loading ? 'Authenticating...' : 'Sign In to Admin Dashboard ➔'}
+          </button>
+        </form>
       </div>
     </main>
   );

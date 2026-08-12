@@ -23,7 +23,7 @@ async function sendMail({ to, subject, html, text }: SendMailParams) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: env.EMAIL_FROM,
+          from: env.EMAIL_FROM || 'HireUp AI <support.hireupai@gmail.com>',
           to: [to],
           subject,
           html,
