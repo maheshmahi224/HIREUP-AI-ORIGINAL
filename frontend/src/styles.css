@@ -7037,42 +7037,44 @@ label {
   gap: 14px !important;
 }
 
-/* Section & Profile Cards */
+/* Section & Profile Cards (Ultra-Sleek High-Density Layout) */
 .v2-profile-card,
 .v2-section-card {
   background: #FFFFFF !important;
-  border: 1.5px solid #E5E7EB !important;
-  border-radius: 14px !important;
-  padding: 14px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 10px !important;
+  padding: 10px 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+  margin-bottom: 8px !important;
 }
 
 .v2-profile-top {
   display: flex !important;
   align-items: center !important;
-  gap: 14px !important;
+  gap: 10px !important;
+  cursor: pointer !important;
 }
 
 .v2-avatar-wrapper {
   position: relative !important;
   cursor: pointer !important;
-  width: 72px !important;
-  height: 72px !important;
+  width: 48px !important;
+  height: 48px !important;
   flex-shrink: 0 !important;
 }
 
 .v2-avatar-img,
 .v2-avatar-placeholder {
-  width: 72px !important;
-  height: 72px !important;
+  width: 48px !important;
+  height: 48px !important;
   border-radius: 50% !important;
   object-fit: cover !important;
   background: #FFF0F3 !important;
-  border: 2px solid #FFC2CE !important;
+  border: 1.5px solid #FFC2CE !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 28px !important;
+  font-size: 20px !important;
 }
 
 .v2-upload-photo-badge {
@@ -7080,52 +7082,77 @@ label {
   bottom: -4px !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  font-size: 9px !important;
+  font-size: 8px !important;
   font-weight: 800 !important;
   background: #FF2D55 !important;
   color: #FFFFFF !important;
   border: none !important;
-  padding: 2px 6px !important;
+  padding: 1px 5px !important;
   border-radius: 99px !important;
   white-space: nowrap !important;
 }
 
+.v2-profile-titles {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
+
 .v2-profile-titles h3 {
-  margin: 0 0 2px !important;
-  font-size: 16px !important;
+  margin: 0 0 1px !important;
+  font-size: 14px !important;
   font-weight: 800 !important;
   color: #111827 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .v2-headline-text {
-  margin: 0 0 4px !important;
-  font-size: 12px !important;
+  margin: 0 0 2px !important;
+  font-size: 11px !important;
   font-weight: 700 !important;
   color: #FF2D55 !important;
   text-transform: uppercase !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
-.v2-sub-meta {
-  display: block !important;
-  font-size: 11px !important;
+.v2-profile-meta-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 10.5px !important;
   color: #6B7280 !important;
+}
+
+.v2-edit-profile-btn {
+  padding: 5px 10px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  background: #FFF0F3 !important;
+  color: #FF2D55 !important;
+  border: 1px solid #FFD6E0 !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
 }
 
 .v2-section-header {
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
+  gap: 8px !important;
   cursor: pointer !important;
-  padding: 4px 0 !important;
+  padding: 2px 0 !important;
 }
 
 .v2-sec-icon {
-  font-size: 18px !important;
+  font-size: 15px !important;
 }
 
 .v2-sec-title {
   flex: 1 !important;
-  font-size: 14px !important;
+  font-size: 13px !important;
   font-weight: 800 !important;
   color: #111827 !important;
 }
@@ -7133,30 +7160,30 @@ label {
 .v2-sec-badge {
   background: #FFF0F3 !important;
   color: #FF2D55 !important;
-  font-size: 10px !important;
+  font-size: 9.5px !important;
   font-weight: 800 !important;
-  padding: 2px 7px !important;
+  padding: 1px 6px !important;
   border-radius: 99px !important;
 }
 
 .v2-sec-arrow {
-  font-size: 11px !important;
+  font-size: 10px !important;
   color: #FF2D55 !important;
   font-weight: 800 !important;
 }
 
 .v2-section-body {
-  margin-top: 12px !important;
+  margin-top: 8px !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 10px !important;
+  gap: 8px !important;
 }
 
-/* Inputs & Form Fields */
+/* Inputs & Form Fields (Sleek Compact High Density) */
 .v2-entry-grid {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
-  gap: 10px !important;
+  gap: 8px !important;
 }
 
 .v2-field-full {
@@ -7166,26 +7193,37 @@ label {
 .v2-input-field {
   display: flex !important;
   flex-direction: column !important;
-  gap: 4px !important;
+  gap: 3px !important;
 }
 
 .v2-input-field span {
-  font-size: 11px !important;
+  font-size: 10px !important;
   font-weight: 700 !important;
   color: #6B7280 !important;
   text-transform: uppercase !important;
+  letter-spacing: 0.02em !important;
 }
 
 .v2-input-field input,
-.v2-input-field select,
-.v2-input-field textarea {
+.v2-input-field select {
   width: 100% !important;
-  padding: 8px 10px !important;
-  font-size: 12.5px !important;
+  height: 34px !important;
+  padding: 6px 9px !important;
+  font-size: 12px !important;
   color: #111827 !important;
   background: #F9FAFB !important;
-  border: 1.5px solid #E5E7EB !important;
-  border-radius: 8px !important;
+  border: 1px solid #D1D5DB !important;
+  border-radius: 6px !important;
+}
+
+.v2-input-field textarea {
+  width: 100% !important;
+  padding: 6px 9px !important;
+  font-size: 12px !important;
+  color: #111827 !important;
+  background: #F9FAFB !important;
+  border: 1px solid #D1D5DB !important;
+  border-radius: 6px !important;
 }
 
 .v2-input-field input:focus,
@@ -7196,12 +7234,65 @@ label {
   outline: none !important;
 }
 
+/* Bullets */
+.v2-bullets-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.v2-bullets-label {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #6B7280 !important;
+  text-transform: uppercase !important;
+}
+
+.v2-bullet-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.v2-bullet-row input {
+  flex: 1 !important;
+  height: 32px !important;
+  padding: 4px 8px !important;
+  font-size: 11.5px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #E5E7EB !important;
+  border-radius: 6px !important;
+}
+
+.v2-bullet-del {
+  width: 26px !important;
+  height: 26px !important;
+  border: none !important;
+  background: #FEE2E2 !important;
+  color: #EF4444 !important;
+  border-radius: 5px !important;
+  font-size: 10px !important;
+  cursor: pointer !important;
+}
+
+.v2-add-bullet-btn {
+  align-self: flex-start !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  background: #FFF0F3 !important;
+  color: #FF2D55 !important;
+  border: 1px dashed #FFC2CE !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+}
+
 /* Entries */
 .v2-entry-box {
-  background: #F9FAFB !important;
+  background: #FAFAFA !important;
   border: 1px solid #E5E7EB !important;
-  border-radius: 10px !important;
-  padding: 10px !important;
+  border-radius: 8px !important;
+  padding: 8px !important;
 }
 
 .v2-entry-head {

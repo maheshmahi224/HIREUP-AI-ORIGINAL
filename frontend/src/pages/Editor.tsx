@@ -698,38 +698,45 @@ export function Editor() {
 
   const renderContent = () => (
     <div className="v2-workspace-scroll">
-      {/* Profile Header Card */}
+      {/* Sleek Compact Profile Card */}
       <div className="v2-profile-card">
         <input type="file" ref={photoInputRef} accept="image/*" style={{ display: 'none' }} onChange={handlePhotoFileChange} />
-        <div className="v2-profile-top">
-          <div className="v2-avatar-wrapper" onClick={() => photoInputRef.current?.click()}>
+        <div className="v2-profile-top" onClick={() => toggleSection('personal')}>
+          <div className="v2-avatar-wrapper" onClick={(e) => { e.stopPropagation(); photoInputRef.current?.click(); }}>
             {data.personal?.photoUrl ? (
               <img src={data.personal.photoUrl} alt="Profile" className="v2-avatar-img" />
             ) : (
               <div className="v2-avatar-placeholder">📷</div>
             )}
-            <button type="button" className="v2-upload-photo-badge">Upload Photo</button>
+            <button type="button" className="v2-upload-photo-badge">Photo</button>
           </div>
           <div className="v2-profile-titles">
             <h3>{data.personal?.name || 'Your Full Name'}</h3>
-            <p className="v2-headline-text">{data.personal?.jobTitle || 'Target Job Title / Headline'}</p>
-            {data.personal?.email && <span className="v2-sub-meta">✉ {data.personal.email}</span>}
-            {data.personal?.phone && <span className="v2-sub-meta">📞 {data.personal.phone}</span>}
-            {data.personal?.location && <span className="v2-sub-meta">📍 {data.personal.location}</span>}
+            <p className="v2-headline-text">{data.personal?.jobTitle || 'Job Title / Headline'}</p>
+            <div className="v2-profile-meta-row">
+              {data.personal?.email && <span>✉ {data.personal.email}</span>}
+              {data.personal?.phone && <span>📞 {data.personal.phone}</span>}
+              {data.personal?.location && <span>📍 {data.personal.location}</span>}
+            </div>
           </div>
+          <button type="button" className="v2-edit-profile-btn">
+            {isSectionOpen('personal') ? 'Done ▲' : 'Edit Profile ✏️'}
+          </button>
         </div>
 
-        {/* Profile Inputs */}
-        <div className="v2-entry-grid" style={{ marginTop: 14 }}>
-          {input('Full Name', data.personal?.name || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), name: v } })))}
-          {input('Job Title / Headline', data.personal?.jobTitle || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), jobTitle: v } })))}
-          {input('Email Address', data.personal?.email || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), email: v } })))}
-          {input('Phone Number', data.personal?.phone || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), phone: v } })))}
-          {input('Location', data.personal?.location || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), location: v } })))}
-          {input('LinkedIn URL', data.personal?.linkedin || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), linkedin: v } })))}
-          {input('GitHub URL', data.personal?.github || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), github: v } })))}
-          {input('Portfolio Website', data.personal?.website || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), website: v } })))}
-        </div>
+        {/* Collapsible Profile Inputs */}
+        {isSectionOpen('personal') && (
+          <div className="v2-entry-grid" style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid #E5E7EB' }}>
+            {input('Full Name', data.personal?.name || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), name: v } })))}
+            {input('Job Title / Headline', data.personal?.jobTitle || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), jobTitle: v } })))}
+            {input('Email Address', data.personal?.email || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), email: v } })))}
+            {input('Phone Number', data.personal?.phone || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), phone: v } })))}
+            {input('Location', data.personal?.location || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), location: v } })))}
+            {input('LinkedIn URL', data.personal?.linkedin || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), linkedin: v } })))}
+            {input('GitHub URL', data.personal?.github || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), github: v } })))}
+            {input('Portfolio Website', data.personal?.website || '', (v) => updateContent((c) => ({ ...c, personal: { ...(c.personal || {}), website: v } })))}
+          </div>
+        )}
       </div>
 
       {/* Professional Summary */}
