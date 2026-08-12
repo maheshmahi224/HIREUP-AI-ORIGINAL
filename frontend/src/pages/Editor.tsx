@@ -154,17 +154,23 @@ function TagInput({ label, tags, onChange }: { label: string; tags: string[]; on
 function SettingsGroup({ title, open, onToggle, children }: { title: string; open: boolean; onToggle: () => void; children: React.ReactNode }) {
   const id = `settings-${title.toLowerCase().replace(/\s+/g, '-')}`;
   return (
-    <section className="settings-group">
-      <button type="button" className="settings-group-title" aria-expanded={open} aria-controls={id} onClick={onToggle}>
-        <span>{title}</span>
-        <i className="accordion-chevron">{open ? '▲' : '▼'}</i>
+    <div className="settings-group-card">
+      <button
+        type="button"
+        className="settings-group-header-btn"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={onToggle}
+      >
+        <span className="settings-group-title-text">{title}</span>
+        <span className="settings-group-icon">{open ? '▲' : '▼'}</span>
       </button>
       {open && (
-        <div id={id} className="settings-group-body">
+        <div id={id} className="settings-group-content-body">
           {children}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
