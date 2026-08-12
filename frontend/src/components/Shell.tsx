@@ -48,9 +48,9 @@ export function Shell({ children, fullBleed = false }: { children: React.ReactNo
   return (
     <div className="shell">
       <aside>
-        <Link className="brand" to="/dashboard">
-          hireup<span>ai</span>
-        </Link>
+        <div style={{ marginBottom: '24px', paddingLeft: '8px' }}>
+          <BrandLogo to="/dashboard" size="md" />
+        </div>
 
         <nav>
           <Link className={isCurrent('/dashboard')} to="/dashboard">

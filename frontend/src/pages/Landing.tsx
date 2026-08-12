@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { BrandLogo } from '../components/BrandLogo.js';
 
 const resumeSections = [
   { title: 'Profile', lines: ['AIML student building practical products with React, Python, and ML workflows.'] },
@@ -210,9 +211,7 @@ export function Landing() {
   return (
     <div className="landing-page">
       <header className="nav landing-nav">
-        <Link className="brand landing-brand" to="/">
-          HireUp<span>.AI</span>
-        </Link>
+        <BrandLogo to="/" size="md" />
         <nav>
           <a href="#transform">How it works</a>
           <a href="#demo">Video Demo</a>
@@ -447,7 +446,10 @@ export function Landing() {
         </section>
       </main>
 
-      <footer className="landing-footer">HireUp.AI &copy; 2026. Professional resumes, human pricing.</footer>
+      <footer className="landing-footer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '24px 32px' }}>
+        <BrandLogo to="/" size="sm" />
+        <span>HireUp.AI &copy; 2026. Professional resumes, human pricing.</span>
+      </footer>
     </div>
   );
 }

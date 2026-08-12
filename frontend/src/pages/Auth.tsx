@@ -1,7 +1,4 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
-import { api, apiBase, setCsrf, type Session } from '../api/client.js';
+import { BrandLogo } from '../components/BrandLogo.js';
 
 export function Auth({ signup = false }: { signup?: boolean }) {
   const nav = useNavigate();
@@ -95,44 +92,37 @@ export function Auth({ signup = false }: { signup?: boolean }) {
   return (
     <div className="auth-page-container">
       <div className="auth-layout-grid">
-        {/* Left Side: Coffee Cup GIF & Brand Showcase */}
+        {/* Left Side: Coffee Cup Logo & Brand Showcase */}
         <div className="auth-left-card">
           <div className="auth-left-header">
-            <Link className="auth-left-brand" to="/">
-              HireUp<span>.AI</span>
-            </Link>
+            <BrandLogo to="/" size="lg" />
           </div>
 
           <div className="auth-gif-wrapper">
             <img
-              src="/coffee-cup.gif"
+              src="/logo.png"
               alt="Big dreams. Better resume."
               className="auth-coffee-gif"
+              style={{ width: '160px', height: '160px', objectFit: 'contain' }}
             />
           </div>
 
-          <div className="auth-left-footer">
-            <h3>Big dreams. Better resume.</h3>
-            <p>Fuel your job search with AI-crafted, recruiter-tested resumes. Pay only &#8377;30 on PDF download.</p>
-            <div className="auth-feature-tags">
-              <span className="auth-tag">☕ ₹30 per download</span>
-              <span className="auth-tag">⚡ Instant AI Extract</span>
-              <span className="auth-tag">🎨 1-Click Styles</span>
-            </div>
+          <div className="auth-left-content">
+            <h2>Craft resumes that get you hired.</h2>
+            <p>Built with AI resume parsing, Groq speed, and instant A4 PDF exports.</p>
           </div>
         </div>
 
-        {/* Right Side: Auth Form */}
-        <div className="auth-right-form">
-          <Link className="brand" to="/" style={{ marginBottom: '20px', display: 'inline-block' }}>
-            hireup<span>ai</span>
-          </Link>
-
-          <p className="eyebrow">{signup ? 'CREATE ACCOUNT' : 'WELCOME BACK'}</p>
-          <h1 style={{ fontSize: '24px', margin: '0 0 6px' }}>{signup ? 'Start building for free' : 'Log in to HireUp'}</h1>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', margin: '0 0 20px', lineHeight: '1.5' }}>
-            Save your career profile and craft recruiter-ready resumes in minutes.
-          </p>
+        {/* Right Side: Interactive Auth Form Card */}
+        <div className="auth-form-card" style={{ padding: '32px' }}>
+          <div className="auth-form-header" style={{ marginBottom: '20px' }}>
+            <BrandLogo to="/" size="md" />
+            <p className="eyebrow" style={{ marginTop: '14px' }}>{signup ? 'CREATE ACCOUNT' : 'WELCOME BACK'}</p>
+            <h1 style={{ fontSize: '24px', margin: '0 0 6px' }}>{signup ? 'Start building for free' : 'Log in to HireUp'}</h1>
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '13px', margin: '0 0 20px', lineHeight: '1.5' }}>
+              Save your career profile and craft recruiter-ready resumes in minutes.
+            </p>
+          </div>
 
           {error && <div className="alert alert-danger">{error}</div>}
           {info && <div className="alert alert-success">{info}</div>}

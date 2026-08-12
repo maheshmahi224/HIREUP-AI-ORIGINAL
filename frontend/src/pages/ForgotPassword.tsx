@@ -1,6 +1,4 @@
-import React, { useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../api/client.js';
+import { BrandLogo } from '../components/BrandLogo.js';
 
 export function ForgotPassword() {
   const nav = useNavigate();
@@ -141,9 +139,9 @@ export function ForgotPassword() {
       <div className="award-auth-bg-glow" />
 
       <div className="award-auth-card">
-        <Link to="/" className="award-brand-link">
-          hireup<span>.ai</span>
-        </Link>
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <BrandLogo to="/" size="lg" />
+        </div>
 
         {/* Step Indicator */}
         <div className="award-step-bar">
