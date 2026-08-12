@@ -1,8 +1,8 @@
+import { createRequire } from 'node:module';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
-import { default as helmet } from 'helmet';
-import { rateLimit } from 'express-rate-limit';
+import type { RequestHandler } from 'express';
 import { env } from './config/env.js';
 import adminRoutes from './routes/admin.routes.js';
 import authRoutes from './routes/auth.routes.js';
@@ -12,6 +12,12 @@ import aiRoutes from './routes/ai.routes.js';
 import paymentRoutes from './routes/payment.routes.js';
 import pdfRoutes from './routes/pdf.routes.js';
 import { errorHandler, ok } from './utils/http.js';
+
+const require = createRequire(import.meta.url);
+const helmet = require('helmet') as (options?: Record<string, unknown>) => RequestHandler;
+const { rateLimit } = require('express-rate-limit') as {
+  rateLimit: (options?: Record<string, unknown>) => RequestHandler;
+};
 
 export const app = express();
 
